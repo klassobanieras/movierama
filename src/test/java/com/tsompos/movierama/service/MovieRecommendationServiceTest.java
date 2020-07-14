@@ -40,8 +40,8 @@ class MovieRecommendationServiceTest {
     void removeReaction() {
         //given
         Set<UserReaction> userReactions = new HashSet<>();
-        userReactions.add(UserReaction.builder().userId("123456").reaction(Reaction.LIKE).build());
-        userReactions.add(UserReaction.builder().userId("1234567").reaction(Reaction.LIKE).build());
+        userReactions.add(UserReaction.builder().username("123456").reaction(Reaction.LIKE).build());
+        userReactions.add(UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build());
         Optional<MovieRecommendation> movieRecommendation = ofNullable(MovieRecommendation.builder()
             .movieId(12345L)
             .title("aTitle")
@@ -53,7 +53,7 @@ class MovieRecommendationServiceTest {
         //when
         serviceUnderTest.removeReaction(12345L, "123456");
         //then
-        assertEquals(Set.of(UserReaction.builder().userId("1234567").reaction(Reaction.LIKE).build()),
+        assertEquals(Set.of(UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build()),
             movieRecommendation.get().getUserReactions());
         verify(movieRecommendationRepository).decrementLikes(12345L);
     }
@@ -75,8 +75,8 @@ class MovieRecommendationServiceTest {
     void switchReactionLikeToHate() {
         //given
         Set<UserReaction> userReactions = new HashSet<>();
-        userReactions.add(UserReaction.builder().userId("123456").reaction(Reaction.LIKE).build());
-        userReactions.add(UserReaction.builder().userId("1234567").reaction(Reaction.LIKE).build());
+        userReactions.add(UserReaction.builder().username("123456").reaction(Reaction.LIKE).build());
+        userReactions.add(UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build());
         Optional<MovieRecommendation> movieRecommendation = ofNullable(MovieRecommendation.builder()
             .movieId(12345L)
             .title("aTitle")
@@ -89,8 +89,8 @@ class MovieRecommendationServiceTest {
         //when
         serviceUnderTest.switchReaction(12345L, "123456");
         //then
-        assertEquals(Set.of(UserReaction.builder().userId("123456").reaction(Reaction.HATE).build(),
-            UserReaction.builder().userId("1234567").reaction(Reaction.LIKE).build()),
+        assertEquals(Set.of(UserReaction.builder().username("123456").reaction(Reaction.HATE).build(),
+            UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build()),
             movieRecommendation.get().getUserReactions());
         verify(movieRecommendationRepository).decrementLikes(12345L);
         verify(movieRecommendationRepository).incrementHates(12345L);
@@ -100,8 +100,8 @@ class MovieRecommendationServiceTest {
     void switchReactionHateToLike() {
         //given
         Set<UserReaction> userReactions = new HashSet<>();
-        userReactions.add(UserReaction.builder().userId("123456").reaction(Reaction.HATE).build());
-        userReactions.add(UserReaction.builder().userId("1234567").reaction(Reaction.LIKE).build());
+        userReactions.add(UserReaction.builder().username("123456").reaction(Reaction.HATE).build());
+        userReactions.add(UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build());
         Optional<MovieRecommendation> movieRecommendation = ofNullable(MovieRecommendation.builder()
             .movieId(12345L)
             .title("aTitle")
@@ -114,8 +114,8 @@ class MovieRecommendationServiceTest {
         //when
         serviceUnderTest.switchReaction(12345L, "123456");
         //then
-        assertEquals(Set.of(UserReaction.builder().userId("123456").reaction(Reaction.HATE).build(),
-            UserReaction.builder().userId("1234567").reaction(Reaction.LIKE).build()),
+        assertEquals(Set.of(UserReaction.builder().username("123456").reaction(Reaction.HATE).build(),
+            UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build()),
             movieRecommendation.get().getUserReactions());
         verify(movieRecommendationRepository).decrementHates(12345L);
         verify(movieRecommendationRepository).incrementLikes(12345L);

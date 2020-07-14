@@ -19,8 +19,9 @@ public final class MovieRecommendation {
     @Id
     @GeneratedValue
     private Long movieId;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String title;
+    @Column(nullable = false)
     private String description;
     private long countOfHates;
     private long countOfLikes;

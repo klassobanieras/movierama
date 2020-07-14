@@ -27,29 +27,29 @@ public class MovieRecommendationService {
         return movieRecommendationRepository.findAllBy(pageable);
     }
 
-    public Page<MovieProjection> fetchAllMoviesOfUser(String userId, Pageable pageable) {
-        return movieRecommendationRepository.findAllByPublishedBy(userId, pageable);
+    public Page<MovieProjection> fetchAllMoviesOfUser(String username, Pageable pageable) {
+        return movieRecommendationRepository.findAllByPublishedBy(username, pageable);
     }
 
-    public MovieRecommendation save(CreateMovie createMovie, String userId) {
+    public MovieRecommendation save(CreateMovie createMovie, String username) {
         MovieRecommendation movieRecommendation = MovieRecommendation.builder()
             .title(createMovie.getTitle())
             .description(createMovie.getDescription())
-            .publishedBy(userId)
+            .publishedBy(username)
             .build();
 
         return Try.of(() -> movieRecommendationRepository.save(movieRecommendation))
             .getOrElseThrow(() -> new EntityExistsException("The Movie already exists"));
     }
 
-    public void addReaction(Long movieId, String userId, Reaction reaction) {
+    public void addReaction(Long movieId, String username, Reaction reaction) {
         MovieRecommendation movieRecommendation =
             movieRecommendationRepository.findById(movieId).orElseThrow(() -> new EntityNotFoundException("Movie not found."));
 
-        if (movieRecommendation.getPublishedBy().equals(userId)) {
+        if (movieRecommendation.getPublishedBy().equals(username)) {
             throw new OwnMovieRecommendation("Cannot " + reaction.name().toLowerCase() + " your own movie.");
         }
-        if (!movieRecommendation.getUserReactions().add(UserReaction.builder().userId(userId).reaction(reaction).build())) {
+        if (!movieRecommendation.getUserReactions().add(UserReaction.builder().username(username).reaction(reaction).build())) {
             throw new MultipleReactionsException("Cannot " + reaction.name().toLowerCase() + " a movie more than once.");
         }
         movieRecommendationRepository.save(movieRecommendation);
@@ -63,13 +63,13 @@ public class MovieRecommendationService {
         }
     }
 
-    public void removeReaction(Long movieId, String userId) {
+    public void removeReaction(Long movieId, String username) {
         MovieRecommendation movieRecommendation =
             movieRecommendationRepository.findById(movieId).orElseThrow(() -> new EntityNotFoundException("Movie not found."));
 
         UserReaction userReaction = movieRecommendation.getUserReactions()
             .stream()
-            .filter(reaction -> reaction.getUserId().equals(userId))
+            .filter(reaction -> reaction.getUsername().equals(username))
             .findAny()
             .orElseThrow(() -> new EntityNotFoundException("No reaction to remove"));
 
@@ -85,13 +85,13 @@ public class MovieRecommendationService {
         }
     }
 
-    public void switchReaction(Long movieId, String userId) {
+    public void switchReaction(Long movieId, String username) {
         MovieRecommendation movieRecommendation =
             movieRecommendationRepository.findById(movieId).orElseThrow(() -> new EntityNotFoundException("Movie not found."));
 
         UserReaction userReaction = movieRecommendation.getUserReactions()
             .stream()
-            .filter(reaction -> reaction.getUserId().equals(userId))
+            .filter(reaction -> reaction.getUsername().equals(username))
             .findAny()
             .orElseThrow(() -> new EntityNotFoundException("No reaction to change"));
 
@@ -99,12 +99,12 @@ public class MovieRecommendationService {
 
         switch (userReaction.getReaction()) {
             case LIKE:
-                movieRecommendation.getUserReactions().add(UserReaction.builder().userId(userId).reaction(Reaction.HATE).build());
+                movieRecommendation.getUserReactions().add(UserReaction.builder().username(username).reaction(Reaction.HATE).build());
                 movieRecommendationRepository.decrementLikes(movieId);
                 movieRecommendationRepository.incrementHates(movieId);
                 break;
             case HATE:
-                movieRecommendation.getUserReactions().add(UserReaction.builder().userId(userId).reaction(Reaction.LIKE).build());
+                movieRecommendation.getUserReactions().add(UserReaction.builder().username(username).reaction(Reaction.LIKE).build());
                 movieRecommendationRepository.decrementHates(movieId);
                 movieRecommendationRepository.incrementLikes(movieId);
                 break;

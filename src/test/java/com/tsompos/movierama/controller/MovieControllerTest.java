@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(MovieController.class)
 class MovieControllerTest {
 
-    private final Jwt jwt = Jwt.withTokenValue("token").header("alg", "none").claim("userId", "1234567").build();
+    private final Jwt jwt = Jwt.withTokenValue("token").header("alg", "none").claim("username", "1234567").build();
     @Autowired
     private MockMvc mockMvc;
     @MockBean

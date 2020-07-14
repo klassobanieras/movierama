@@ -12,14 +12,14 @@ public class UserReaction {
 
     @EqualsAndHashCode.Include
     @Column(nullable = false)
-    private String userId;
+    private String username;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Reaction reaction;
 
     @Builder
-    private UserReaction(String userId, Reaction reaction) {
-        this.userId = userId;
+    private UserReaction(String username, Reaction reaction) {
+        this.username = username;
         this.reaction = reaction;
     }
 }

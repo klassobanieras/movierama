@@ -15,7 +15,7 @@ public interface MovieRecommendationRepository extends JpaRepository<MovieRecomm
     Page<MovieProjection> findAllBy(Pageable pageable);
 
 
-    Page<MovieProjection> findAllByPublishedBy(String userId, Pageable pageable);
+    Page<MovieProjection> findAllByPublishedBy(String username, Pageable pageable);
 
     @Modifying
     @Transactional

@@ -29,9 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class UserShould {
 
-    private final Jwt jwtOfMoviePublisher = Jwt.withTokenValue("token").header("alg", "none").claim("userId", "1234567").build();
-    private final Jwt jwtOfAnotherUser = Jwt.withTokenValue("token").header("alg", "none").claim("userId", "12345678").build();
-    private final Jwt jwtOfThirdUser = Jwt.withTokenValue("token").header("alg", "none").claim("userId", "123456789").build();
+    private final Jwt jwtOfMoviePublisher = Jwt.withTokenValue("token").header("alg", "none").claim("username", "1234567").build();
+    private final Jwt jwtOfAnotherUser = Jwt.withTokenValue("token").header("alg", "none").claim("username", "12345678").build();
+    private final Jwt jwtOfThirdUser = Jwt.withTokenValue("token").header("alg", "none").claim("username", "123456789").build();
 
     @Autowired
     MovieRecommendationRepository movieRecommendationRepository;
@@ -262,7 +262,7 @@ class UserShould {
 
         //when
         mockMvc.perform(
-            get(MOVIES_URL + "/{userId}", jwtOfMoviePublisher.getClaims().get("userId")).contentType(MediaType.APPLICATION_JSON)
+            get(MOVIES_URL + "/{username}", jwtOfMoviePublisher.getClaims().get("username")).contentType(MediaType.APPLICATION_JSON)
                 .with(jwt().jwt(jwtOfAnotherUser))).andDo(print()).andExpect(status().isOk());
     }
 

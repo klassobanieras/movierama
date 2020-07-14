@@ -11,7 +11,6 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 
 import static com.tsompos.movierama.config.ApplicationConfiguration.MOVIES_URL;
 
-
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 

@@ -1,9 +1,15 @@
+server:
+  port: 8080
+  max-http-header-size: 10000000 # this is required to handle the long size JWT
+  servlet:
+    context-path: /movierama
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: https://login.domain.com/xxx/keys
+          issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_xWwuwSy6V
+
   datasource:
     driverClassName: org.h2.Driver
     username: sa
