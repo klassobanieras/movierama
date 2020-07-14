@@ -32,6 +32,7 @@ out/
 .vscode/
 
 # General
+**/node_modules/**
 target/
 /target/
 logs/
