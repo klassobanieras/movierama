@@ -4,23 +4,10 @@ import {
     MOVIES_LIST_SIZE,
     AUTH_SIGN_IN_URL,
     AUTH_SIGN_UP_URL,
-    CHECK_USERNAME_AVAILABILITY_URL,
-    CHECK_EMAIL_AVAILABILITY_URL,
-    CURRENT_USER_URL,
-    USERS_URL,
-    ADD_MOVIE_URL,
     MOVIES_URL,
-    CLEAR_OPINION_URL,
     PREFIX_GET_MOVIES_URL,
-    OPINION_URL,
-    PREFIX_GET_MOVIES_ORDERED_BY_LIKE_URL,
-    PREFIX_GET_MOVIES_ORDERED_BY_HATE_URL,
-    GET_MOVIES_OPINIONS_URL,
     SIZE_PARAMETER, API_AUTH_URL,
 } from '../constants/Constants';
-import {Logger} from 'aws-amplify';
-
-const logger = new Logger('ApiClient');
 
 const request = (options) => {
     const headers = new Headers({
@@ -30,7 +17,6 @@ const request = (options) => {
     if (localStorage.getItem(ACCESS_TOKEN)) {
         headers.append('Authorization', `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`)
     }
-    logger.info(headers.get('Authorization'))
 
     const defaults = {headers: headers};
     options = Object.assign({}, defaults, options);
@@ -41,7 +27,7 @@ const request = (options) => {
                 return Promise.reject(json);
             }
             return json;
-        }).catch(() => logger.error('json is empty'))
+        })
     );
 };
 

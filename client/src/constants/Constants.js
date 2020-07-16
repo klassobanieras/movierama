@@ -5,17 +5,6 @@ export const ACCESS_TOKEN = 'accessToken';
 
 export const MOVIES_LIST_SIZE = 5;
 
-export const NAME_MIN_LENGTH = 4;
-export const NAME_MAX_LENGTH = 40;
-
-export const USERNAME_MIN_LENGTH = 3;
-export const USERNAME_MAX_LENGTH = 15;
-
-export const EMAIL_MAX_LENGTH = 40;
-
-export const PASSWORD_MIN_LENGTH = 8;
-export const PASSWORD_MAX_LENGTH = 20;
-
 export const MOVIE_DESCRIPTION_MAX_LENGTH = 400;
 export const MOVIE_TITLE_MAX_LENGTH = 100;
 

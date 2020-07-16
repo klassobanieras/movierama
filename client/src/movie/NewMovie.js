@@ -3,7 +3,6 @@ import { createMovie } from '../utils/APIClient';
 import { MOVIE_TITLE_MAX_LENGTH, MOVIE_DESCRIPTION_MAX_LENGTH } from '../constants/Constants';
 import './newMovie.css';  
 import { Form, Input, Button, notification } from 'antd';
-import {withRouter} from "react-router-dom";
 const FormItem = Form.Item;
 const { TextArea } = Input;
 

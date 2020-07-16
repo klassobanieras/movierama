@@ -2,14 +2,11 @@ import React, {Component} from 'react';
 import './Movie.css';
 import {Avatar, Card} from 'antd';
 import {Link} from 'react-router-dom';
-import {LikeOutlined, DislikeOutlined, CalendarOutlined, PlusOutlined} from '@ant-design/icons';
+import {LikeOutlined, DislikeOutlined} from '@ant-design/icons';
 import {getAvatarColor} from '../utils/Colors';
 import {formatDateTime} from '../utils/Helpers';
-import {Logger} from "aws-amplify";
 
-import {Radio, Button} from 'antd';
-
-const logger = new Logger('Movie');
+import {Button} from 'antd';
 
 class Movie extends Component {
 
@@ -20,8 +17,6 @@ class Movie extends Component {
 
     render() {
 
-        logger.info(this.props.movie);
-        logger.info(this.props.currentVote);
 
         let isVoteable = true;
         if (this.props.currentUsername) {

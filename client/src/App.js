@@ -12,7 +12,7 @@ import {ACCESS_TOKEN, APPLICATION_NAME, SUCCESSFULL_LOGIN, SUCCESSFULL_LOGOUT} f
 import MovieList from './movie/MovieList'
 import NewMovie from './movie/NewMovie'
 import {LoginForm} from './user/login/Login';
-import Signup, {SignUp} from './user/signup/SignUp';
+import {SignUp} from './user/signup/SignUp';
 import Profile from './user/profile/Profile';
 import AppHeader from './common/AppHeader';
 import NotFound from './common/NotFound';
