@@ -49,12 +49,20 @@ class App extends Component {
         });
 
         Hub.listen(AuthService.CHANNEL, (data) => {
-            this.onAuthEvent();
+            let {payload} = data;
+            this.onAuthEvent(payload);
         })
+
     }
 
     onAuthEvent(payload) {
-        this.loadCurrentUser();
+        if (payload.event === AuthService.AUTH_EVENTS.LOGIN) {
+            this.loadCurrentUser();
+
+        }
+        else if(payload.event === AuthService.AUTH_EVENTS.SIGN_OUT) {
+            this.handleLogout();
+        }
     }
 
     loadCurrentUser() {
@@ -93,7 +101,6 @@ class App extends Component {
             isAuthenticated: false
         });
 
-        AuthService.signOut();
         this.props.history.push(redirectTo);
 
         notification[notificationType]({
@@ -127,7 +134,7 @@ class App extends Component {
                         <Switch>
                             <Route exact path="/"
                                    render={(props) => <MovieList isAuthenticated={this.state.isAuthenticated}
-                                                                 currentUser={this.state.currentUser} handleLogout={this.handleLogout}
+                                                                 currentUser={this.state.currentUser}
                                                                  isProfileMovieList={false} {...props}/>}>
                             </Route>
                             <Route path="/login" component={LoginForm}></Route>

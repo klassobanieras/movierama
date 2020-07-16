@@ -12,7 +12,10 @@ export function SignUp() {
 
     const styles = {
         loginForm: {
-            "max-width": "300px"
+            "max-width": "300px",
+            "margin": "auto",
+            "width": "50%",
+            "padding": "10px"
         },
         loginFormForgot: {
             "float": "right"

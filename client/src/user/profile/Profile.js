@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import MovieList from '../../movie/MovieList';
 import { getUserProfile } from '../../utils/APIClient';
 import { Avatar, Tabs, notification } from 'antd';
-import { getAvatarColor } from '../../utils/Colors';
 import LoadIndicator  from '../../common/LoadIndicator';
 import './profile.css';
 import NotFound from '../../common/NotFound';

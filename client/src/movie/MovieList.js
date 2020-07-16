@@ -14,6 +14,7 @@ import {LikeOutlined, DislikeOutlined, CalendarOutlined, PlusOutlined} from '@an
 import {MOVIES_LIST_SIZE} from '../constants/Constants';
 import {withRouter} from 'react-router-dom';
 import './movieList.css';
+import {AuthService} from "../utils/AuthService";
 
 class MovieList extends Component {
     constructor(props) {
@@ -161,7 +162,7 @@ class MovieList extends Component {
 
             }).catch(error => {
             if (error.status === 401) {
-                this.props.handleLogout('/login', 'error', 'You have been logged out. Please login to vote');
+                AuthService.signOut();
             } else {
                 notification.error({
                     message: 'Movierama',
@@ -197,7 +198,7 @@ class MovieList extends Component {
                 });
             }).catch(error => {
             if (error.status === 401) {
-                this.props.handleLogout('/login', 'error', 'You have been logged out. Please login to vote');
+                AuthService.signOut();
             } else {
                 notification.error({
                     message: 'Movierama',

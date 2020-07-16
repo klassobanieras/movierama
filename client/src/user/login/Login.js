@@ -6,7 +6,7 @@ import {AuthService} from "../../utils/AuthService";
 import {Hub, Logger} from '@aws-amplify/core';
 import {Auth} from "aws-amplify";
 import {LockOutlined, UserOutlined} from "@ant-design/icons";
-
+import './login.css';
 
 export function LoginForm() {
     const logger = new Logger('LoginForm');
@@ -14,7 +14,10 @@ export function LoginForm() {
 
     const styles = {
         loginForm: {
-            "maxWidth": "300px"
+            "maxWidth": "300px",
+            "margin": "auto",
+            "width": "50%",
+            "padding": "10px"
         },
         loginFormForgot: {
             "float": "right"
