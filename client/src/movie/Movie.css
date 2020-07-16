@@ -8,13 +8,13 @@
     margin-bottom: 30px;
     padding: 20px 15px 20px 15px;
     letter-spacing: .01em;
-    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
+    /*box-shadow: 0 2px 2px 0 white, 0 0 0 1px whitesmoke;*/
 }
 
 .movie-question {
     font-weight: 500;
     font-size: 21px;
-    color: rgba(0, 0, 0, 0.85);
+    /*color: white;*/
     margin-bottom: 10px;
 }
 
@@ -43,50 +43,37 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    color: rgba(0, 0, 0, 0.75);
+    /*color: rgba(0, 0, 0, 0.75);*/
 }
 
 .vote-button {
     border-radius: 15px;
     margin-right: 15px;
-    color: #40a9ff;
-    border-color: #40a9ff;
+    /*color: #40a9ff;*/
+    /*border-color: #40a9ff;*/
 }
 
 .vote-button:hover {
     color: #1890ff;
-    border-color: #1890ff;    
+    /*border-color: #1890ff;    */
 }
 
 .vote-button[disabled], .vote-button[disabled]:hover, .vote-button[disabled]:focus {
-    color: #40a9ff;
-    border-color: #40a9ff;
-    background-color: #fff;
+    /*color: #40a9ff;*/
+    /*border-color: #40a9ff;*/
+    /*background-color: #fff;*/
     opacity: 0.4;
 }
 
 .clear-button {
     border-radius: 15px;
     margin-right: 15px;
-    color: #ff7e5e;
-    border-color: #ff7e5e;
-}
-
-.clear-button:hover {
-    color: #ff4618;
-    border-color: #ff4618;    
-}
-
-.clear-button[disabled], .clear-button[disabled]:hover, .clear-button[disabled]:focus {
-    color: #ff7e5e;
-    border-color: #ff7e5e;
-    background-color: #fff;
-    opacity: 0.4;
+    /*color: #ff7e5e;*/
+    /*border-color: #ff7e5e;*/
 }
 .separator {
     margin-left: 10px;
     margin-right: 10px;
-    color: #8899A6;
 }
 
 .cv-movie-choice {
@@ -111,7 +98,6 @@
 
 .cv-choice-percentage {
     font-weight: 600;
-    color: rgba(0, 0, 0, 0.75);
 }
 
 .cv-choice-text {
@@ -126,7 +112,6 @@
 .selected-choice-icon {
     margin-left: 10px;
     font-weight: 600;
-    color: rgba(0, 0, 0, 0.75);
 }
 
 .cv-choice-percent-chart {
@@ -181,21 +166,18 @@
 .movie-creator-name {
     font-size: 16px;
     font-weight: 500;
-    color: rgba(0, 0, 0, 0.85);
     margin-top: 4px;
     display: inline-block;    
     margin-right: 8px;
 }
 
 .movie-creator-username {
-    color: #657786;
     font-size: 15px;
     display: inline-block;  
 }
 
 .movie-creation-date {
     display: block; 
-    color: #657786;
     font-size: 13px;
     margin-top: 2px;
 }

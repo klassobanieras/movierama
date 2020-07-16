@@ -1,92 +1,151 @@
-import React, { Component } from 'react';
-import { login } from '../../utils/APIClient';
-import './login.css';
-import { Link } from 'react-router-dom';
-import { ACCESS_TOKEN, LOGIN_AUTHORIZATION_ERROR_MESSAGE, LOGIN_GENERAL_ERROR, APPLICATION_NAME } from '../../constants/Constants';
+import {Button, Form, Input, notification, Row} from 'antd';
+import React, {useEffect, useState} from 'react';
+import {Link, useHistory} from 'react-router-dom';
 
-import { Form, Input, Button, notification } from 'antd';
-import {LockOutlined, UserOutlined} from '@ant-design/icons';
-const FormItem = Form.Item;
+import {AuthService} from "../../utils/AuthService";
+import {Hub, Logger} from '@aws-amplify/core';
+import {Auth} from "aws-amplify";
+import {LockOutlined, UserOutlined} from "@ant-design/icons";
 
-class Login extends Component {
-    render() {
-        return (
-            <div className="login-container">
-                <h1 className="page-title">Login</h1>
-                <div className="login-content">
-                    <Form onLogin={this.props.onLogin} />
-                </div>
-            </div>
-        );
-    }
-}
 
-class LoginForm extends Component {
-    constructor(props) {
-        super(props);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
+export function LoginForm() {
+    const logger = new Logger('LoginForm');
+    const history = useHistory();
 
-    handleSubmit(event) {
-        event.preventDefault();   
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                const loginRequest = Object.assign({}, values);
-                login(loginRequest)
-                .then(response => {
-                    localStorage.setItem(ACCESS_TOKEN, response.accessToken);
-                    this.props.onLogin();
-                }).catch(error => {
-                    if(error.status === 401) {
-                        notification.error({
-                            message: APPLICATION_NAME,
-                            description: LOGIN_AUTHORIZATION_ERROR_MESSAGE
-                        });                    
-                    } else {
-                        notification.error({
-                            message: APPLICATION_NAME,
-                            description: error.message || LOGIN_GENERAL_ERROR
-                        });                                            
-                    }
+    const styles = {
+        loginForm: {
+            "maxWidth": "300px"
+        },
+        loginFormForgot: {
+            "float": "right"
+        },
+        loginFormButton: {
+            "width": "100%"
+        }
+    };
+    const [errorMessage, setErrorMessage] = useState("");
+    const [userNotConfirmed, setUserNotConfirmed] = useState(false);
+
+    useEffect(() => {
+        Hub.listen(AuthService.CHANNEL, onHubCapsule, 'MyListener');
+
+        Auth.currentAuthenticatedUser({
+            bypassCache: true  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+        }).then(user => {
+            if (user)
+                history.push("/")
+
+        }).catch(err => console.log(err));
+
+        return function cleanup() {
+            logger.info("Removing HUB subscription to " + AuthService.CHANNEL);
+            Hub.remove(AuthService.CHANNEL, onHubCapsule);
+        };
+    });
+
+
+    // Default handler for listening events
+    const onHubCapsule = (capsule) => {
+        const {channel, payload} = capsule;
+        if (channel === AuthService.CHANNEL && payload.event === AuthService.AUTH_EVENTS.LOGIN) {
+            logger.info("Hub Payload: " + JSON.stringify(payload));
+            if (!payload.success) {
+                logger.info("Payload error: " + JSON.stringify(payload.error));
+
+                setErrorMessage(payload.message);
+
+                if (payload.error.code === 'UserNotConfirmedException') {
+                    notification.open({
+                        type: 'error',
+                        message: 'Could not log in',
+                        description: 'You have not confirmed your email. We have sent you another code. Please use it to confirm your email.',
+                        duration: 20
+                    });
+                    setUserNotConfirmed(true);
+
+                    // Resending another code
+                    AuthService.resendConfirmationCode(payload.email);
+
+                    history.push("/signup-confirm");
+
+
+                } else {
+                    notification.open({
+                        type: 'error',
+                        message: 'Could not log in',
+                        description: payload.message,
+                        duration: 10
+                    });
+                }
+            } else {
+                notification.open({
+                    type: 'success',
+                    message:
+                        ' You have successfully logged in!',
+                    description: 'Welcome!',
                 });
+
+                history.push("/")
             }
-        });
-    }
+        }
+    };
+    const onFinish = values => {
+        console.log('Success:', values);
+        AuthService.login(values.username, values.password);
+    };
 
-    render() {
-        const { getFieldDecorator } = this.props.form;
-        return (
-            <Form onSubmit={this.handleSubmit} className="login-form">
-                <FormItem>
-                    {getFieldDecorator('usernameOrEmail', {
-                        rules: [{ required: true, message: 'Please input your email or username!' }],
-                    })(
-                    <Input 
+    const onFinishFailed = errorInfo => {
+        console.log('Failed:', errorInfo);
+    };
+
+    return <div>
+        <Row style={{display: 'flex', justifyContent: 'center', margin: "15px"}}>
+            Login
+        </Row>
+        <Row>
+            <Form
+                name="basic"
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                style={styles.loginForm}>
+                <Form.Item
+                    name="username"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input your email!',
+                        }
+                    ]}>
+                    <Input
                         prefix={<UserOutlined/>}
-                        size="large"
-                        name="usernameOrEmail" 
-                        placeholder="Email or username" />    
-                    )}
-                </FormItem>
-                <FormItem>
-                {getFieldDecorator('password', {
-                    rules: [{ required: true, message: 'Please input your Password!' }],
-                })(
-                    <Input 
-                        prefix={<LockOutlined/>}
-                        size="large"
-                        name="password" 
-                        type="password" 
-                        placeholder="Password"  />                        
-                )}
-                </FormItem>
-                <FormItem>
-                    <Button type="primary" htmlType="submit" size="large" className="login-form-button">Login</Button>
-                    Or <Link to="/signup">Register now!</Link>
-                </FormItem>
-            </Form>
-        );
-    }
-}
+                        placeholder="Email"
+                    />
+                </Form.Item>
+                <Form.Item
+                    name="password"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input your Password!'
+                        }
+                    ]}>
 
-export default Login;
+                    <Input
+                        prefix={<LockOutlined/>}
+                        type="password"
+                        placeholder="Password"
+                    />
+
+                </Form.Item>
+                <Form.Item>
+                    <Button type="primary" htmlType="submit" style={styles.loginFormButton}>
+                        Log in
+                    </Button>
+                    Don't have an account? <Link to="signup">Register here</Link>
+                </Form.Item>
+            </Form>
+        </Row>
+    </div>
+
+
+}

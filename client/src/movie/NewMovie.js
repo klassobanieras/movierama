@@ -3,6 +3,7 @@ import { createMovie } from '../utils/APIClient';
 import { MOVIE_TITLE_MAX_LENGTH, MOVIE_DESCRIPTION_MAX_LENGTH } from '../constants/Constants';
 import './newMovie.css';  
 import { Form, Input, Button, notification } from 'antd';
+import {withRouter} from "react-router-dom";
 const FormItem = Form.Item;
 const { TextArea } = Input;
 
@@ -24,14 +25,13 @@ class NewMovie extends Component {
         this.isFormInvalid = this.isFormInvalid.bind(this);
     }
 
-    handleSubmit(event) {
-        event.preventDefault();
+    handleSubmit() {
         const movieData = {
             description: this.state.description.text,
             title: this.state.title.text,
         };
 
-        createMovie(this.props.currentUser.username, movieData)
+        createMovie(movieData)
         .then(response => {
             notification.success({
                 message: 'Movierama',
@@ -123,7 +123,7 @@ class NewMovie extends Component {
             <div className="new-movie-container">
                 <h1 className="page-title">Add a new Movie</h1>
                 <div className="new-movie-content">
-                    <Form onSubmit={this.handleSubmit} className="create-movie-form">
+                    <Form onFinish={this.handleSubmit} onSubmit={this.handleSubmit} className="create-movie-form">
                         <FormItem validateStatus={this.state.title.validateStatus}
                             help={this.state.title.errorMsg} className="movie-form-row">
                             <TextArea 

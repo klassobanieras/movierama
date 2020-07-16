@@ -13,7 +13,7 @@ export const USERNAME_MAX_LENGTH = 15;
 
 export const EMAIL_MAX_LENGTH = 40;
 
-export const PASSWORD_MIN_LENGTH = 6;
+export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 20;
 
 export const MOVIE_DESCRIPTION_MAX_LENGTH = 400;
@@ -29,8 +29,8 @@ export const SERVER_ERROR_PAGE_MESSAGE = 'Oops! Something went wrong at our Serv
 export const SERVER_ERROR_PAGE_CODE = 500;
 export const LOGIN_AUTHORIZATION_ERROR_MESSAGE = 'Your Username or Password is incorrect. Please try again!';
 export const LOGIN_GENERAL_ERROR = 'Sorry! Something went wrong. Please try again!';
-export const AUTH_SIGN_IN_URL = "/auth/signin";
-export const AUTH_SIGN_UP_URL = "/auth/signup";
+export const AUTH_SIGN_IN_URL = "/signin";
+export const AUTH_SIGN_UP_URL = "/signup";
 
 export const USERS_URL = "/users/";
 export const MOVIES_URL = "/movies/";

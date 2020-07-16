@@ -1,36 +1,41 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import './Movie.css';
-import { Avatar } from 'antd';
-import { Link } from 'react-router-dom';
+import {Avatar, Card} from 'antd';
+import {Link} from 'react-router-dom';
 import {LikeOutlined, DislikeOutlined, CalendarOutlined, PlusOutlined} from '@ant-design/icons';
-import { getAvatarColor } from '../utils/Colors';
-import { formatDateTime } from '../utils/Helpers';
+import {getAvatarColor} from '../utils/Colors';
+import {formatDateTime} from '../utils/Helpers';
+import {Logger} from "aws-amplify";
 
-import { Radio, Button } from 'antd';
-const RadioGroup = Radio.Group;
+import {Radio, Button} from 'antd';
+
+const logger = new Logger('Movie');
 
 class Movie extends Component {
-    
+
 
     isSelected = (choice) => {
         return this.props.movie.selectedChoice === choice;
     }
 
     render() {
-        
+
+        logger.info(this.props.movie);
+        logger.info(this.props.currentVote);
+
         let isVoteable = true;
-        if(this.props.currentUsername){
-            isVoteable = this.props.currentUsername === this.props.movie.publishedBy;
+        if (this.props.currentUsername) {
+            isVoteable = this.props.currentUsername != this.props.movie.publishedBy;
         }
 
         return (
-            <div className="movie-content">
+            <Card>
                 <div className="movie-header">
                     <div className="movie-creator-info">
                         <Link className="creator-link" to={`/users/${this.props.movie.publishedBy}`}>
-                            <Avatar className="movie-creator-avatar" 
-                                style={{ backgroundColor: getAvatarColor(this.props.movie.publishedBy)}} >
-                                {this.props.movie.publishedBy.slice(0,1).toUpperCase()}
+                            <Avatar className="movie-creator-avatar"
+                                    style={{backgroundColor: getAvatarColor(this.props.movie.publishedBy)}}>
+                                {this.props.movie.publishedBy.slice(0, 1).toUpperCase()}
                             </Avatar>
                             <span className="movie-creator-username">
                                 Posted by: @{this.props.movie.publishedBy}
@@ -47,49 +52,37 @@ class Movie extends Component {
                         {this.props.movie.description}
                     </div>
                 </div>
-
-                <div className="movie-choices">
-                    {
-                        !isVoteable 
-                        ? 
-                        <RadioGroup 
-                        className="movie-choice-radio-group" 
-                        onChange={this.props.handleVoteChange} 
-                        value={this.props.currentUserReaction}>
-                        <Radio className="movie-choice-radio" key={'radio.likeId'} value={"LIKE"}>Like</Radio>
-                        <Radio className="movie-choice-radio" key={'radio.hateId'} value={"HATE"}>Hate</Radio>
-                        </RadioGroup>
-                        :null
-                    }
-
-                </div>
-
                 <div className="movie-footer">
-                
-                    {
-                        !isVoteable 
-                        ?
-                        <Button className="vote-button" disabled={!this.props.currentVote} onClick={this.props.handleVoteSubmit}>Vote</Button>
-                        :null
-
-                    }
-                    
-                    <span className="total-votes">{this.props.movie.countOfLikes} <LikeOutlined/></span>
-                    <span className="separator"></span>
-                    <span className="total-votes">{this.props.movie.countOfHates} <DislikeOutlined/></span>
-                    {
-                        this.props.movie.currentUserReaction
-                        ? <span className="separator">| You have voted {`${this.props.movie.currentUserReaction}`}.</span>
-                        :<span className="separator"></span>
-                    }
 
                     {
-                        this.props.movie.currentUserReaction
-                        ? <Button className="clear-button" disabled={!this.props.movie.currentUserReaction } onClick={this.props.handleClearVote}>Clear</Button>
-                        :null
+                        isVoteable
+                            ?
+                            this.props.movie.currentUserReaction == 'LIKE'
+                                ? <span className="total-votes">{this.props.movie.countOfLikes} <Button
+                                    icon={<LikeOutlined style={{color: 'hotpink'}}/>} onClick={this.props.handleClearVote}/> </span>
+                                : this.props.movie.currentUserReaction == 'HATE'
+                                    ? <span className="total-votes">{this.props.movie.countOfLikes} <Button
+                                        icon={<LikeOutlined/>} onClick={this.props.handleClearVote}/> </span>
+                                    : <span className="total-votes">{this.props.movie.countOfLikes} <Button icon={<LikeOutlined/>}
+                                        onClick={this.props.handleLike}/> </span>
+                            : <span className="total-votes">{this.props.movie.countOfLikes}<LikeOutlined/></span>
+                    }
+                    <span className="separator"/>
+                    {
+                        isVoteable
+                            ?
+                            this.props.movie.currentUserReaction == 'HATE'
+                                ? <span className="total-votes">{this.props.movie.countOfHates} <Button
+                                    icon={<DislikeOutlined style={{color: 'hotpink'}}/>} onClick={this.props.handleClearVote}/> </span>
+                                : this.props.movie.currentUserReaction == 'LIKE'
+                                    ? <span className="total-votes">{this.props.movie.countOfHates} <Button
+                                        icon={<DislikeOutlined/>} onClick={this.props.handleClearVote}/> </span>
+                                    : <span className="total-votes">{this.props.movie.countOfHates} <Button
+                                        icon={<DislikeOutlined/>} onClick={this.props.handleHate}/> </span>
+                            : <span className="total-votes">{this.props.movie.countOfLikes} <DislikeOutlined/></span>
                     }
                 </div>
-            </div>
+            </Card>
         );
     }
 }

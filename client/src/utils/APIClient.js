@@ -18,26 +18,30 @@ import {
     GET_MOVIES_OPINIONS_URL,
     SIZE_PARAMETER, API_AUTH_URL,
 } from '../constants/Constants';
+import {Logger} from 'aws-amplify';
+
+const logger = new Logger('ApiClient');
 
 const request = (options) => {
     const headers = new Headers({
         'Content-Type': 'application/json',
     })
-    
-    if(localStorage.getItem(ACCESS_TOKEN)) {
-        headers.append('Authorization', 'Bearer ' + localStorage.getItem(ACCESS_TOKEN))
+
+    if (localStorage.getItem(ACCESS_TOKEN)) {
+        headers.append('Authorization', `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`)
     }
+    logger.info(headers.get('Authorization'))
 
     const defaults = {headers: headers};
     options = Object.assign({}, defaults, options);
 
     return fetch(options.url, options).then(response =>
         response.json().then(json => {
-            if(!response.ok) {
+            if (!response.ok) {
                 return Promise.reject(json);
             }
             return json;
-        })
+        }).catch(() => logger.error('json is empty'))
     );
 };
 
@@ -57,30 +61,16 @@ export function signup(signupRequest) {
     });
 }
 
-export function checkUsernameAvailability(username) {
-    return request({
-        url: API_AUTH_URL + CHECK_USERNAME_AVAILABILITY_URL + username,
-        method: 'GET'
-    });
-}
-
-export function checkEmailAvailability(email) {
-    return request({
-        url: API_AUTH_URL + CHECK_EMAIL_AVAILABILITY_URL + email,
-        method: 'GET'
-    });
-}
-
-export function getCurrentUser() {
-    if(!localStorage.getItem(ACCESS_TOKEN)) {
-        return Promise.reject("No access token set.");
-    }
-
-    return request({
-        url: API_AUTH_URL + CURRENT_USER_URL,
-        method: 'GET'
-    });
-}
+// export function getCurrentUser() {
+//     if(!localStorage.getItem(ACCESS_TOKEN)) {
+//         return Promise.reject("No access token set.");
+//     }
+//
+//     return request({
+//         url: API_AUTH_URL + CURRENT_USER_URL,
+//         method: 'GET'
+//     });
+// }
 
 export function getUserProfile(username) {
     return request({
@@ -89,11 +79,11 @@ export function getUserProfile(username) {
     });
 }
 
-export function createMovie(username, movieData) {
+export function createMovie(movieData) {
     return request({
-        url: API_BASE_URL + USERS_URL + username + ADD_MOVIE_URL,
+        url: API_BASE_URL + MOVIES_URL,
         method: 'POST',
-        body: JSON.stringify(movieData)         
+        body: JSON.stringify(movieData)
     });
 }
 
@@ -112,7 +102,7 @@ export function getAllMoviesOrderedByLikes(page, size) {
     size = size || MOVIES_LIST_SIZE;
 
     return request({
-        url: API_BASE_URL + PREFIX_GET_MOVIES_ORDERED_BY_LIKE_URL + page + SIZE_PARAMETER + size,
+        url: API_BASE_URL + PREFIX_GET_MOVIES_URL + page + SIZE_PARAMETER + size + '&sort=countOfLikes,desc',
         method: 'GET'
     });
 }
@@ -122,7 +112,7 @@ export function getAllMoviesOrderedByHates(page, size) {
     size = size || MOVIES_LIST_SIZE;
 
     return request({
-        url: API_BASE_URL + PREFIX_GET_MOVIES_ORDERED_BY_HATE_URL + page + SIZE_PARAMETER + size,
+        url: API_BASE_URL + PREFIX_GET_MOVIES_URL + page + SIZE_PARAMETER + size + '&sort=countOfHates,desc',
         method: 'GET'
     });
 }
@@ -132,35 +122,22 @@ export function getMoviesCreatedByUser(username, page, size) {
     size = size || MOVIES_LIST_SIZE;
 
     return request({
-        url: API_BASE_URL + USERS_URL + username + PREFIX_GET_MOVIES_URL + page + SIZE_PARAMETER + size,
+        url: API_BASE_URL + MOVIES_URL + username + '?page=' + page + SIZE_PARAMETER + size,
         method: 'GET'
     });
 }
 
-export function getOpinions(username, page, size) {
-    page = page || 0;
-    size = size || MOVIES_LIST_SIZE;
+export function expressReaction(reactionData) {
 
     return request({
-        url: API_BASE_URL + USERS_URL + username + GET_MOVIES_OPINIONS_URL + page + SIZE_PARAMETER + size,
-        method: 'GET'
+        url: API_BASE_URL + MOVIES_URL + reactionData.movieId + '/reaction/' + reactionData.reaction,
+        method: 'POST',
     });
 }
 
-export function expressOpinion(opinionData) {
-    const opinionRequest = {
-        opinionText : opinionData.opinion
-    };
+export function removeReaction(movieId) {
     return request({
-        url: API_BASE_URL + MOVIES_URL + opinionData.movieId + OPINION_URL,
-        method: 'POST',
-        body: JSON.stringify(opinionRequest)
-    });
-}
-
-export function clearOpinion(movieId) {
-    return request({
-        url: API_BASE_URL + MOVIES_URL + movieId + CLEAR_OPINION_URL,
-        method: 'POST',
+        url: API_BASE_URL + MOVIES_URL + movieId + '/reaction',
+        method: 'DELETE',
     });
 }

@@ -1,13 +1,13 @@
 import {Button, Form, Input, notification, Row} from 'antd';
 import React, {useEffect, useState} from 'react';
-import {Link, useHistory} from 'react-router-dom';
 import {Hub, Logger} from '@aws-amplify/core';
 import {AuthService} from "../../utils/AuthService";
+import {Link, useHistory} from "react-router-dom";
 import {LockOutlined, UserOutlined} from "@ant-design/icons";
 
-export function SignUp() {
+export function SignUpConfirm() {
 
-    const logger = new Logger("RegisterForm");
+    const logger = new Logger("RegisterConfirmForm");
     const history = useHistory();
 
     const styles = {
@@ -28,36 +28,42 @@ export function SignUp() {
     useEffect(() => {
         Hub.listen(AuthService.CHANNEL, onHubCapsule, 'MyListener');
 
-
         return function cleanup() {
             logger.info("Removing HUB subscription to " + AuthService.CHANNEL);
             Hub.remove(AuthService.CHANNEL, onHubCapsule);
         };
     });
 
-
     // Default handler for listening events
     const onHubCapsule = (capsule) => {
         const {channel, payload} = capsule;
-        if (channel === AuthService.CHANNEL && payload.event === AuthService.AUTH_EVENTS.REGISTER) {
+        if (channel === AuthService.CHANNEL &&
+            (AuthService.AUTH_EVENTS.REGISTER_CONFIRM)) {
             if (!payload.success) {
                 setErrorMessage(payload.message);
                 notification.open({
                     type: 'error',
-                    message: 'Could not register',
+                    message: 'Could not log in',
                     description: payload.message,
                     duration: 10
                 });
             } else {
-                // Successful registration -- now let's confirm the email with a code (route to the next screen)
-                history.push("/signup-confirm")
+                notification.open({
+                    type: 'success',
+                    message:
+                        'Perfect!',
+                    description: 'You have confirmed your email. Now you can login',
+                    duration: 15
+                });
+
+                history.push("/login")
             }
         }
     };
 
     const onFinish = values => {
         console.log('Success:', values);
-        AuthService.register(values.username, values.password);
+        AuthService.confirmSignUp(values.username, values.code);
     };
 
     const onFinishFailed = errorInfo => {
@@ -66,7 +72,7 @@ export function SignUp() {
 
     return <div>
         <Row style={{display: 'flex', justifyContent: 'center', margin: "15px"}}>
-            Register
+            Use the emailed code to confirm your email
         </Row>
         <Row>
             <Form
@@ -79,7 +85,7 @@ export function SignUp() {
                     rules={[
                         {
                             required: true,
-                            message: 'Please input your email!',
+                            message: 'Please input your email',
                         }
                     ]}>
                     <Input
@@ -88,26 +94,26 @@ export function SignUp() {
                     />
                 </Form.Item>
                 <Form.Item
-                    name="password"
+                    name="code"
                     rules={[
                         {
                             required: true,
-                            message: 'Please input your Password!'
+                            message: 'Please input your confirmation code!'
                         }
                     ]}>
 
                     <Input
                         prefix={<LockOutlined/>}
-                        type="password"
-                        placeholder="Password"
+                        type="string"
+                        placeholder="Code"
                     />
-
                 </Form.Item>
                 <Form.Item>
+
                     <Button type="primary" htmlType="submit" style={styles.loginFormButton}>
-                        Register
+                        Confirm Email
                     </Button>
-                    Already registered? <Link to="login">login</Link>
+                    Already confirmed? <Link to="login">Login</Link>
                 </Form.Item>
             </Form>
         </Row>
