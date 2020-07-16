@@ -11,6 +11,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -47,19 +48,22 @@ public class MovieController {
     }
 
     @PostMapping(MOVIES_URL + "/{movieId}/reaction/{reaction}")
-    public void setReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId, @PathVariable String reaction) {
+    public ResponseEntity<String> setReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId, @PathVariable String reaction) {
         movieRecommendationService.addReaction(movieId, principal.getClaimAsString("email"),
             Reaction.valueOf(reaction.toUpperCase()));
+        return ResponseEntity.ok("{\"Success\": \"true\"}");
     }
 
     @DeleteMapping(MOVIES_URL + "/{movieId}/reaction")
-    public void removeReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId) {
+    public ResponseEntity<String> removeReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId) {
         movieRecommendationService.removeReaction(movieId, principal.getClaimAsString("email"));
+        return ResponseEntity.ok("{\"Success\": \"true\"}");
     }
 
     @PutMapping(MOVIES_URL + "/{movieId}/reaction")
-    public void switchReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId) {
+    public ResponseEntity<String> switchReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId) {
         movieRecommendationService.switchReaction(movieId, principal.getClaimAsString("email"));
+        return ResponseEntity.ok("{\"Success\": \"true\"}");
     }
 
 }
