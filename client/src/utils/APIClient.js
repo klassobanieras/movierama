@@ -2,11 +2,9 @@ import {
     API_BASE_URL,
     ACCESS_TOKEN,
     MOVIES_LIST_SIZE,
-    AUTH_SIGN_IN_URL,
-    AUTH_SIGN_UP_URL,
     MOVIES_URL,
     PREFIX_GET_MOVIES_URL,
-    SIZE_PARAMETER, API_AUTH_URL,
+    SIZE_PARAMETER,
 } from '../constants/Constants';
 
 const request = (options) => {
@@ -30,33 +28,6 @@ const request = (options) => {
         })
     );
 };
-
-export function login(loginRequest) {
-    return request({
-        url: API_AUTH_URL + AUTH_SIGN_IN_URL,
-        method: 'POST',
-        body: JSON.stringify(loginRequest)
-    });
-}
-
-export function signup(signupRequest) {
-    return request({
-        url: API_AUTH_URL + AUTH_SIGN_UP_URL,
-        method: 'POST',
-        body: JSON.stringify(signupRequest)
-    });
-}
-
-// export function getCurrentUser() {
-//     if(!localStorage.getItem(ACCESS_TOKEN)) {
-//         return Promise.reject("No access token set.");
-//     }
-//
-//     return request({
-//         url: API_AUTH_URL + CURRENT_USER_URL,
-//         method: 'GET'
-//     });
-// }
 
 export function getUserProfile(username) {
     return request({

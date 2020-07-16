@@ -21,7 +21,7 @@ import PrivateRoute from './common/PrivateRoute';
 
 import {Layout, notification} from 'antd';
 import {SignUpConfirm} from "./user/signup/SignUpConfirm";
-import Amplify from '@aws-amplify/core'
+import {Amplify, Hub} from '@aws-amplify/core'
 import awsConfig from "./config/aws-config";
 
 const {Content} = Layout;
@@ -47,6 +47,14 @@ class App extends Component {
             top: 70,
             duration: 3,
         });
+
+        Hub.listen(AuthService.CHANNEL, (data) => {
+            this.onAuthEvent();
+        })
+    }
+
+    onAuthEvent(payload) {
+        this.loadCurrentUser();
     }
 
     loadCurrentUser() {
@@ -69,6 +77,12 @@ class App extends Component {
 
     componentDidMount() {
         this.loadCurrentUser();
+    }
+
+    componentDidUpdate() {
+        if (localStorage.getItem("ACCESS_TOKEN")) {
+            this.loadCurrentUser()
+        }
     }
 
     handleLogout(redirectTo = "/", notificationType = "success", description = SUCCESSFULL_LOGOUT) {
