@@ -52,7 +52,6 @@ public class MovieRecommendationService {
         if (!movieRecommendation.getUserReactions().add(UserReaction.builder().username(username).reaction(reaction).build())) {
             throw new MultipleReactionsException("Cannot " + reaction.name().toLowerCase() + " a movie more than once.");
         }
-        movieRecommendationRepository.save(movieRecommendation);
         switch (reaction) {
             case LIKE:
                 movieRecommendationRepository.incrementLikes(movieRecommendation.getMovieId());

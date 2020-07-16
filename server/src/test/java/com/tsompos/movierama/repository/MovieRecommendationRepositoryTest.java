@@ -2,11 +2,13 @@ package com.tsompos.movierama.repository;
 
 import com.tsompos.movierama.dto.MovieProjection;
 import com.tsompos.movierama.entity.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.*;
 
+import javax.persistence.EntityManager;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,6 +18,8 @@ class MovieRecommendationRepositoryTest {
 
     @Autowired
     private MovieRecommendationRepository movieRecommendationRepository;
+    @Autowired
+    private EntityManager entityManager;
 
     @Test
     void findAll() {
@@ -86,5 +90,41 @@ class MovieRecommendationRepositoryTest {
         assertEquals(2, movies.getContent().get(0).getCountOfHates());
         assertEquals(1, movies.getContent().get(1).getCountOfHates());
         assertEquals(0, movies.getContent().get(2).getCountOfHates());
+    }
+
+    @Test
+    void testIncrementLikes() {
+        MovieRecommendation movieRecommendation = movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
+        movieRecommendationRepository.incrementLikes(movieRecommendation.getMovieId());
+        entityManager.clear();
+
+        Assertions.assertEquals(1, movieRecommendationRepository.findById(movieRecommendation.getMovieId()).get().getCountOfLikes());
+    }
+
+    @Test
+    void testIncrementHates() {
+        MovieRecommendation movieRecommendation = movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
+        movieRecommendationRepository.incrementHates(movieRecommendation.getMovieId());
+        entityManager.clear();
+
+        Assertions.assertEquals(1, movieRecommendationRepository.findById(movieRecommendation.getMovieId()).get().getCountOfHates());
+    }
+
+    @Test
+    void testDecrementLikes() {
+        MovieRecommendation movieRecommendation = movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
+        movieRecommendationRepository.decrementLikes(movieRecommendation.getMovieId());
+        entityManager.clear();
+
+        Assertions.assertEquals(-1, movieRecommendationRepository.findById(movieRecommendation.getMovieId()).get().getCountOfLikes());
+    }
+
+    @Test
+    void testDecrementHates() {
+        MovieRecommendation movieRecommendation = movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
+        movieRecommendationRepository.decrementHates(movieRecommendation.getMovieId());
+        entityManager.clear();
+
+        Assertions.assertEquals(-1, movieRecommendationRepository.findById(movieRecommendation.getMovieId()).get().getCountOfHates());
     }
 }

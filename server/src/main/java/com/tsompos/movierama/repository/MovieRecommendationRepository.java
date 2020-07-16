@@ -24,7 +24,7 @@ public interface MovieRecommendationRepository extends JpaRepository<MovieRecomm
 
     @Modifying
     @Transactional
-    @Query("UPDATE MovieRecommendation movie SET movie.countOfLikes = movie.countOfLikes + 1 WHERE movie.movieId= :movieId")
+    @Query("UPDATE MovieRecommendation movie SET movie.countOfHates = movie.countOfHates + 1 WHERE movie.movieId= :movieId")
     void incrementHates(@Param("movieId") Long movieId);
 
     @Modifying
@@ -34,7 +34,7 @@ public interface MovieRecommendationRepository extends JpaRepository<MovieRecomm
 
     @Modifying
     @Transactional
-    @Query("UPDATE MovieRecommendation movie SET movie.countOfLikes = movie.countOfLikes - 1 WHERE movie.movieId= :movieId")
+    @Query("UPDATE MovieRecommendation movie SET movie.countOfHates = movie.countOfHates - 1 WHERE movie.movieId= :movieId")
     void decrementHates(@Param("movieId") Long movieId);
 
 }

@@ -8,7 +8,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_DG0NdwimO
+          issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_HjAf7afig
   datasource:
     driverClassName: org.h2.Driver
     username: sa

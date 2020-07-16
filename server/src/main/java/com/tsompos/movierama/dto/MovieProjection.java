@@ -35,7 +35,7 @@ public interface MovieProjection {
         }
         Jwt principal = (Jwt) authentication.getPrincipal();
         return getUserReactions().stream()
-            .filter(userReaction -> userReaction.getUsername().equals(principal.getClaimAsString("username")))
+            .filter(userReaction -> userReaction.getUsername().equals(principal.getClaimAsString("email")))
             .findFirst()
             .map(UserReaction::getReaction)
             .map(Reaction::name)
