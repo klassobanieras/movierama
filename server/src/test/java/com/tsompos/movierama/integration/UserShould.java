@@ -29,9 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class UserShould {
 
-    private final Jwt jwtOfMoviePublisher = Jwt.withTokenValue("token").header("alg", "none").claim("username", "1234567").build();
-    private final Jwt jwtOfAnotherUser = Jwt.withTokenValue("token").header("alg", "none").claim("username", "12345678").build();
-    private final Jwt jwtOfThirdUser = Jwt.withTokenValue("token").header("alg", "none").claim("username", "123456789").build();
+    private final Jwt jwtOfMoviePublisher = Jwt.withTokenValue("token").header("alg", "none").claim("email", "1234567").build();
+    private final Jwt jwtOfAnotherUser = Jwt.withTokenValue("token").header("alg", "none").claim("email", "12345678").build();
+    private final Jwt jwtOfThirdUser = Jwt.withTokenValue("token").header("alg", "none").claim("email", "123456789").build();
 
     @Autowired
     MovieRecommendationRepository movieRecommendationRepository;
