@@ -27,21 +27,27 @@ public class MovieController {
     private final MovieRecommendationService movieRecommendationService;
 
     @GetMapping(MOVIES_URL)
-    public Page<MovieProjection> getAllMovies(@PageableDefault(page = 0, size = 20)
-    @SortDefault.SortDefaults({@SortDefault(sort = "publishedDate", direction = Sort.Direction.DESC)}) Pageable pageable) {
-        return movieRecommendationService.fetchAllMovies(pageable);
+    public Page<MovieProjection> getAllMovies(@AuthenticationPrincipal Jwt principal, @PageableDefault(page = 0, size = 20)
+    @SortDefault.SortDefaults( {@SortDefault(sort = "PUBLISHED_DATE", direction = Sort.Direction.DESC)}) Pageable pageable) {
+        if (principal != null && principal.containsClaim("email")) {
+            return movieRecommendationService.fetchAllMovies(principal.getClaimAsString("email"), pageable);
+        }
+        return movieRecommendationService.fetchAllMovies("", pageable);
     }
 
-    @GetMapping(MOVIES_URL + "/{username}")
-    public Page<MovieProjection> getAllMovies(@PathVariable String username, @PageableDefault(page = 0, size = 20)
-    @SortDefault.SortDefaults({@SortDefault(sort = "publishedDate", direction = Sort.Direction.DESC)}) Pageable pageable) {
-        return movieRecommendationService.fetchAllMoviesOfUser(username, pageable);
+    @GetMapping(MOVIES_URL + "/{email}")
+    public Page<MovieProjection> getAllMovies(@AuthenticationPrincipal Jwt principal, @PathVariable String email, @PageableDefault(page = 0, size = 20)
+    @SortDefault.SortDefaults( {@SortDefault(sort = "PUBLISHED_DATE", direction = Sort.Direction.DESC)}) Pageable pageable) {
+        if (principal != null && principal.containsClaim("email")) {
+            return movieRecommendationService.fetchAllMoviesOfUser(principal.getClaimAsString("email"), email, pageable);
+        }
+        return movieRecommendationService.fetchAllMoviesOfUser("", email, pageable);
     }
 
     @PostMapping(MOVIES_URL)
     @ResponseStatus(HttpStatus.CREATED)
     public MovieRecommendation createMovieRecommendation(@AuthenticationPrincipal Jwt principal,
-        @RequestBody CreateMovie createMovie) {
+                                                         @RequestBody CreateMovie createMovie) {
         log.info(principal.getClaims().toString());
         log.info(principal.getSubject());
         return movieRecommendationService.save(createMovie, principal.getClaimAsString("email"));

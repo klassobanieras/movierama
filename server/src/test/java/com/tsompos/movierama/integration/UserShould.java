@@ -58,12 +58,11 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
         mockMvc.perform(get(MOVIES_URL))
             .andDo(print())
-            .andExpect(status().isOk())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.[0].currentUserReaction", is("NONE")));
     }
@@ -80,7 +79,7 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
         mockMvc.perform(get(MOVIES_URL).contentType(MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser)))
@@ -133,7 +132,7 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
     }
 
@@ -149,11 +148,11 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfThirdUser))).andExpect(status().isOk());
     }
 
@@ -169,13 +168,13 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isBadRequest());
 
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isBadRequest());
     }
 
@@ -191,13 +190,13 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isBadRequest());
 
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isBadRequest());
     }
 
@@ -213,10 +212,10 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfMoviePublisher))).andExpect(status().isBadRequest());
 
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfMoviePublisher))).andExpect(status().isBadRequest());
     }
 
@@ -232,10 +231,10 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
-        mockMvc.perform(delete(MOVIES_URL + "/{movieId}" + "/reaction", movieRecommendation.getMovieId()).contentType(
+        mockMvc.perform(delete(MOVIES_URL + "/{movieId}" + "/reaction", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
     }
 
@@ -262,7 +261,7 @@ class UserShould {
 
         //when
         mockMvc.perform(
-            get(MOVIES_URL + "/{username}", jwtOfMoviePublisher.getClaims().get("username")).contentType(MediaType.APPLICATION_JSON)
+            get(MOVIES_URL + "/{email}", jwtOfMoviePublisher.getClaims().get("email")).contentType(MediaType.APPLICATION_JSON)
                 .with(jwt().jwt(jwtOfAnotherUser))).andDo(print()).andExpect(status().isOk());
     }
 
@@ -278,8 +277,8 @@ class UserShould {
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
-        var firstCall = CompletableFuture.supplyAsync(() -> like(movieRecommendation.getMovieId(), jwtOfAnotherUser));
-        var secondCall = CompletableFuture.supplyAsync(() -> like(movieRecommendation.getMovieId(), jwtOfThirdUser));
+        var firstCall = CompletableFuture.supplyAsync(() -> like(movieRecommendation.getId(), jwtOfAnotherUser));
+        var secondCall = CompletableFuture.supplyAsync(() -> like(movieRecommendation.getId(), jwtOfThirdUser));
 
         CompletableFuture.allOf(firstCall, secondCall).get();
     }

@@ -144,7 +144,7 @@ class MovieList extends Component {
 
         console.log(selectedChoice);
         const reactionData = {
-            movieId: movie.movieId,
+            movieId: movie.id,
             reaction: selectedChoice
         };
 
@@ -185,7 +185,7 @@ class MovieList extends Component {
 
         const movie = this.state.movies[movieIndex];
 
-        removeReaction(movie.movieId)
+        removeReaction(movie.id)
             .then(() => {
                 const movies = this.state.movies.slice();
                 movies[movieIndex].currentUserReaction === 'LIKE'
@@ -289,7 +289,7 @@ class MovieList extends Component {
         const movieViews = [];
         this.state.movies.forEach((movie, movieId) => {
             movieViews.push(<Movie
-                key={movie.movieId}
+                key={movie.id}
                 movie={movie}
                 currentVote={movie.currentUserReaction}
                 currentUsername={this.props.currentUser ? this.props.currentUser : null}

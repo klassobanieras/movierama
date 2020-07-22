@@ -59,7 +59,7 @@ export function getAllMoviesOrderedByLikes(page, size) {
     size = size || MOVIES_LIST_SIZE;
 
     return request({
-        url: API_BASE_URL + PREFIX_GET_MOVIES_URL + page + SIZE_PARAMETER + size + '&sort=countOfLikes,desc',
+        url: API_BASE_URL + PREFIX_GET_MOVIES_URL + page + SIZE_PARAMETER + size + '&sort=COUNT_OF_LIKES,desc',
         method: 'GET'
     });
 }
@@ -69,7 +69,7 @@ export function getAllMoviesOrderedByHates(page, size) {
     size = size || MOVIES_LIST_SIZE;
 
     return request({
-        url: API_BASE_URL + PREFIX_GET_MOVIES_URL + page + SIZE_PARAMETER + size + '&sort=countOfHates,desc',
+        url: API_BASE_URL + PREFIX_GET_MOVIES_URL + page + SIZE_PARAMETER + size + '&sort=COUNT_OF_HATES,desc',
         method: 'GET'
     });
 }

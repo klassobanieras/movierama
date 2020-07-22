@@ -23,12 +23,12 @@ public class MovieRecommendationService {
 
     private final MovieRecommendationRepository movieRecommendationRepository;
 
-    public Page<MovieProjection> fetchAllMovies(Pageable pageable) {
-        return movieRecommendationRepository.findAllBy(pageable);
+    public Page<MovieProjection> fetchAllMovies(String email, Pageable pageable) {
+        return movieRecommendationRepository.findAll(email, pageable);
     }
 
-    public Page<MovieProjection> fetchAllMoviesOfUser(String username, Pageable pageable) {
-        return movieRecommendationRepository.findAllByPublishedBy(username, pageable);
+    public Page<MovieProjection> fetchAllMoviesOfUser(String emailOfCurrentUser, String email, Pageable pageable) {
+        return movieRecommendationRepository.findAllPublishedBy(emailOfCurrentUser, email, pageable);
     }
 
     public MovieRecommendation save(CreateMovie createMovie, String username) {
@@ -54,10 +54,10 @@ public class MovieRecommendationService {
         }
         switch (reaction) {
             case LIKE:
-                movieRecommendationRepository.incrementLikes(movieRecommendation.getMovieId());
+                movieRecommendationRepository.incrementLikes(movieRecommendation.getId());
                 break;
             case HATE:
-                movieRecommendationRepository.incrementHates(movieRecommendation.getMovieId());
+                movieRecommendationRepository.incrementHates(movieRecommendation.getId());
                 break;
         }
     }
@@ -76,10 +76,10 @@ public class MovieRecommendationService {
 
         switch (userReaction.getReaction()) {
             case LIKE:
-                movieRecommendationRepository.decrementLikes(movieRecommendation.getMovieId());
+                movieRecommendationRepository.decrementLikes(movieRecommendation.getId());
                 break;
             case HATE:
-                movieRecommendationRepository.decrementHates(movieRecommendation.getMovieId());
+                movieRecommendationRepository.decrementHates(movieRecommendation.getId());
                 break;
         }
     }

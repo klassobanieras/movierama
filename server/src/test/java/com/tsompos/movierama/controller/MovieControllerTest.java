@@ -53,9 +53,9 @@ class MovieControllerTest {
     @SneakyThrows
     void shouldFetchMoviesSuccessfully() {
         //given
-        Mockito.when(movieRecommendationService.fetchAllMovies(any())).thenReturn(Page.empty());
+        Mockito.when(movieRecommendationService.fetchAllMovies(any(), any())).thenReturn(Page.empty());
         //when
-        mockMvc.perform(get(MOVIES_URL + "?sort={}")).andExpect(status().isOk()).andDo(document("movies"));
+        mockMvc.perform(get(MOVIES_URL)).andExpect(status().isOk()).andDo(document("movies"));
     }
 
 

@@ -1,48 +1,32 @@
 package com.tsompos.movierama.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tsompos.movierama.entity.Reaction;
-import com.tsompos.movierama.entity.UserReaction;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.web.ProjectedPayload;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @ProjectedPayload
 public interface MovieProjection {
 
-    Long getMovieId();
+    @Value("#{target.id}")
+    Long getId();
 
     String getTitle();
 
     String getDescription();
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    Set<UserReaction> getUserReactions();
-
+    @Value("#{target.COUNT_OF_LIKES}")
     long getCountOfLikes();
 
+    @Value("#{target.COUNT_OF_HATES}")
     long getCountOfHates();
 
-    default String getCurrentUserReaction() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return "NONE";
-        }
-        Jwt principal = (Jwt) authentication.getPrincipal();
-        return getUserReactions().stream()
-            .filter(userReaction -> userReaction.getUsername().equals(principal.getClaimAsString("email")))
-            .findFirst()
-            .map(UserReaction::getReaction)
-            .map(Reaction::name)
-            .orElse("NONE");
-    }
+    @Value("#{target.CURRENT_USER_REACTION == null ? 'NONE' : target.CURRENT_USER_REACTION}")
+    String getCurrentUserReaction();
 
+    @Value("#{target.PUBLISHED_BY}")
     String getPublishedBy();
 
+    @Value("#{target.PUBLISHED_DATE}")
     LocalDateTime getPublishedDate();
 }

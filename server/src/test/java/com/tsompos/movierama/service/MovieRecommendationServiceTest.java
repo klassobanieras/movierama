@@ -25,7 +25,7 @@ class MovieRecommendationServiceTest {
     void addReaction() {
         //given
         Optional<MovieRecommendation> movieRecommendation = ofNullable(
-            MovieRecommendation.builder().movieId(12345L).title("aTitle").description("aDescription").publishedBy("123").build());
+            MovieRecommendation.builder().id(12345L).title("aTitle").description("aDescription").publishedBy("123").build());
 
         when(movieRecommendationRepository.findById(any())).thenReturn(movieRecommendation);
         //when
@@ -43,7 +43,7 @@ class MovieRecommendationServiceTest {
         userReactions.add(UserReaction.builder().username("123456").reaction(Reaction.LIKE).build());
         userReactions.add(UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build());
         Optional<MovieRecommendation> movieRecommendation = ofNullable(MovieRecommendation.builder()
-            .movieId(12345L)
+            .id(12345L)
             .title("aTitle")
             .description("aDescription")
             .userReactions(userReactions)
@@ -78,7 +78,7 @@ class MovieRecommendationServiceTest {
         userReactions.add(UserReaction.builder().username("123456").reaction(Reaction.LIKE).build());
         userReactions.add(UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build());
         Optional<MovieRecommendation> movieRecommendation = ofNullable(MovieRecommendation.builder()
-            .movieId(12345L)
+            .id(12345L)
             .title("aTitle")
             .description("aDescription")
             .countOfLikes(2)
@@ -103,7 +103,7 @@ class MovieRecommendationServiceTest {
         userReactions.add(UserReaction.builder().username("123456").reaction(Reaction.HATE).build());
         userReactions.add(UserReaction.builder().username("1234567").reaction(Reaction.LIKE).build());
         Optional<MovieRecommendation> movieRecommendation = ofNullable(MovieRecommendation.builder()
-            .movieId(12345L)
+            .id(12345L)
             .title("aTitle")
             .description("aDescription")
             .countOfLikes(2)
