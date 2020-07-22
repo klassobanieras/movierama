@@ -26,8 +26,8 @@ class MovieRecommendationRepositoryTest {
         movieRecommendationRepository.save(MovieRecommendation.builder()
             .title("aTitle")
             .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).username("1234").build(),
-                UserReaction.builder().reaction(Reaction.LIKE).username("12345").build()))
+            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).email("1234").build(),
+                UserReaction.builder().reaction(Reaction.LIKE).email("12345").build()))
             .countOfLikes(2)
             .build());
 
@@ -41,8 +41,8 @@ class MovieRecommendationRepositoryTest {
         movieRecommendationRepository.save(MovieRecommendation.builder()
             .title("aTitle")
             .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).username("1234").build(),
-                UserReaction.builder().reaction(Reaction.LIKE).username("12345").build()))
+            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).email("1234").build(),
+                UserReaction.builder().reaction(Reaction.LIKE).email("12345").build()))
             .countOfLikes(2)
             .build());
 
@@ -64,15 +64,15 @@ class MovieRecommendationRepositoryTest {
         movieRecommendationRepository.save(MovieRecommendation.builder()
             .title("bTitle")
             .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).username("1234").build(),
-                UserReaction.builder().reaction(Reaction.LIKE).username("12345").build()))
+            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).email("1234").build(),
+                UserReaction.builder().reaction(Reaction.LIKE).email("12345").build()))
             .countOfLikes(2)
             .build());
 
         movieRecommendationRepository.save(MovieRecommendation.builder()
             .title("cTitle")
             .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).username("1234").build()))
+            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).email("1234").build()))
             .countOfLikes(1)
             .build());
 
@@ -92,15 +92,15 @@ class MovieRecommendationRepositoryTest {
         movieRecommendationRepository.save(MovieRecommendation.builder()
             .title("bTitle")
             .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.HATE).username("1234").build(),
-                UserReaction.builder().reaction(Reaction.HATE).username("12345").build()))
+            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.HATE).email("1234").build(),
+                UserReaction.builder().reaction(Reaction.HATE).email("12345").build()))
             .countOfHates(2)
             .build());
 
         movieRecommendationRepository.save(MovieRecommendation.builder()
             .title("cTitle")
             .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.HATE).username("1234").build()))
+            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.HATE).email("1234").build()))
             .countOfHates(1)
             .build());
 

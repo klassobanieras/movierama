@@ -19,18 +19,18 @@ public interface MovieRecommendationRepository extends JpaRepository<MovieRecomm
             "FROM MOVIE_RECOMMENDATION m " +
                   "LEFT JOIN ( SELECT ur.MOVIE_RECOMMENDATION_ID, ur.reaction " +
                                 "FROM MOVIE_RECOMMENDATION_USER_REACTIONS ur " +
-                                "WHERE ur.username = :email" +
+                                "WHERE ur.email = :emailOfCurrentUser" +
                             ") as cur ON cur.MOVIE_RECOMMENDATION_ID = m.ID "
         , countQuery = "SELECT COUNT(*) FROM MOVIE_RECOMMENDATION"
         , nativeQuery = true)
-    Page<MovieProjection> findAll(@Param("email") String email, Pageable pageable);
+    Page<MovieProjection> findAll(@Param("emailOfCurrentUser") String emailOfCurrentUser, Pageable pageable);
 
     @Query(value =
         "SELECT m.* , cur.reaction AS CURRENT_USER_REACTION " +
             "FROM MOVIE_RECOMMENDATION m " +
                 "LEFT JOIN ( SELECT ur.MOVIE_RECOMMENDATION_ID, ur.reaction " +
                                 "FROM MOVIE_RECOMMENDATION_USER_REACTIONS ur " +
-                                "WHERE ur.username = :emailOfCurrentUser" +
+                                "WHERE ur.email = :emailOfCurrentUser" +
                             ") as cur ON cur.MOVIE_RECOMMENDATION_ID = m.ID " +
             "WHERE m.PUBLISHED_BY = :email"
         , countQuery = "SELECT COUNT(*) FROM MOVIE_RECOMMENDATION m WHERE m.PUBLISHED_BY = :email"
