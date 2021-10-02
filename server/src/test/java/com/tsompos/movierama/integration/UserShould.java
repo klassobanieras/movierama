@@ -13,14 +13,17 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static com.tsompos.movierama.config.ApplicationConfiguration.MOVIES_URL;
+import static com.tsompos.movierama.config.SecurityConfiguration.USER_CLAIM;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,9 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class UserShould {
 
-    private final Jwt jwtOfMoviePublisher = Jwt.withTokenValue("token").header("alg", "none").claim("email", "1234567").build();
-    private final Jwt jwtOfAnotherUser = Jwt.withTokenValue("token").header("alg", "none").claim("email", "12345678").build();
-    private final Jwt jwtOfThirdUser = Jwt.withTokenValue("token").header("alg", "none").claim("email", "123456789").build();
+    private final Jwt jwtOfMoviePublisher = Jwt.withTokenValue("token").header("alg", "none").claim(USER_CLAIM, "1234567").build();
+    private final Jwt jwtOfAnotherUser = Jwt.withTokenValue("token").header("alg", "none").claim(USER_CLAIM, "12345678").build();
+    private final Jwt jwtOfThirdUser = Jwt.withTokenValue("token").header("alg", "none").claim(USER_CLAIM, "123456789").build();
 
     @Autowired
     MovieRecommendationRepository movieRecommendationRepository;
@@ -62,9 +65,9 @@ class UserShould {
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
         mockMvc.perform(get(MOVIES_URL))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content.[0].currentUserReaction", is("NONE")));
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.content.[0].usersReaction", is("NONE")));
     }
 
     @Test
@@ -83,9 +86,9 @@ class UserShould {
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
         mockMvc.perform(get(MOVIES_URL).contentType(MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser)))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content.[0].currentUserReaction", is("LIKE")));
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.content.[0].usersReaction", is("LIKE")));
 
     }
 
@@ -158,12 +161,16 @@ class UserShould {
 
     @Test
     @SneakyThrows
-    void notBeAbleToVoteAgainOnAHatedMovie() {
+    void notBeAbleToHateAgainOnAHatedMovie() {
 
         //given
         String postMovieResponse = mockMvc.perform(post(MOVIES_URL).contentType(MediaType.APPLICATION_JSON)
-            .content("{\"title\": \"a Title\", \"description\": \"a " + "Description\"}")
-            .with(jwt().jwt(jwtOfMoviePublisher))).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+                                                                   .content("{\"title\": \"a Title\", \"description\": \"a " + "Description\"}")
+                                                                   .with(jwt().jwt(jwtOfMoviePublisher)))
+                                          .andExpect(status().isCreated())
+                                          .andReturn()
+                                          .getResponse()
+                                          .getContentAsString();
 
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
@@ -175,26 +182,27 @@ class UserShould {
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isBadRequest());
 
         mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
-            MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isBadRequest());
+                MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
     }
 
     @Test
     @SneakyThrows
-    void notBeAbleToVoteAgainOnALikedMovie() {
+    void notBeAbleToLikeAgainOnALikedMovie() {
 
         //given
         String postMovieResponse = mockMvc.perform(post(MOVIES_URL).contentType(MediaType.APPLICATION_JSON)
-            .content("{\"title\": \"a Title\", \"description\": \"a " + "Description\"}")
-            .with(jwt().jwt(jwtOfMoviePublisher))).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+                                                                   .content("{\"title\": \"a Title\", \"description\": \"a " + "Description\"}")
+                                                                   .with(jwt().jwt(jwtOfMoviePublisher)))
+                                          .andExpect(status().isCreated())
+                                          .andReturn()
+                                          .getResponse()
+                                          .getContentAsString();
 
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
         mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
-
-        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/hate", movieRecommendation.getId()).contentType(
-            MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isBadRequest());
 
         mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
             MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isBadRequest());
@@ -225,17 +233,21 @@ class UserShould {
 
         //given
         String postMovieResponse = mockMvc.perform(post(MOVIES_URL).contentType(MediaType.APPLICATION_JSON)
-            .content("{\"title\": \"a Title\", \"description\": \"a " + "Description\"}")
-            .with(jwt().jwt(jwtOfMoviePublisher))).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+                                                                   .content("{\"title\": \"a Title\", \"description\": \"a " + "Description\"}")
+                                                                   .with(jwt().jwt(jwtOfMoviePublisher)))
+                                          .andExpect(status().isCreated())
+                                          .andReturn()
+                                          .getResponse()
+                                          .getContentAsString();
 
         var movieRecommendation = objectMapper.readValue(postMovieResponse, MovieRecommendation.class);
 
         //when
         mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieRecommendation.getId()).contentType(
-            MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
+                MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
 
-        mockMvc.perform(delete(MOVIES_URL + "/{movieId}" + "/reaction", movieRecommendation.getId()).contentType(
-            MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
+        mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/none", movieRecommendation.getId()).contentType(
+                MediaType.APPLICATION_JSON).with(jwt().jwt(jwtOfAnotherUser))).andExpect(status().isOk());
     }
 
     @Test
@@ -284,8 +296,12 @@ class UserShould {
     }
 
     @SneakyThrows
-    private int like(Long movieId, Jwt jwt) {
+    private int like(UUID movieId, Jwt jwt) {
         return mockMvc.perform(post(MOVIES_URL + "/{movieId}" + "/reaction/like", movieId).contentType(MediaType.APPLICATION_JSON)
-            .with(jwt().jwt(jwt))).andExpect(status().isOk()).andReturn().getResponse().getStatus();
+                                                                                          .with(jwt().jwt(jwt)))
+                      .andExpect(status().isOk())
+                      .andReturn()
+                      .getResponse()
+                      .getStatus();
     }
 }

@@ -3,21 +3,28 @@ server:
   max-http-header-size: 10000000 # this is required to handle the long size JWT
   servlet:
     context-path: /movierama
+  compression:
+    enabled: true
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_HjAf7afig
+          issuer-uri: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_sswJkuXU4
   datasource:
     driverClassName: org.h2.Driver
     username: sa
     password: password
     url: jdbc:h2:mem:movierama;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;
-  jpa:
-    show-sql: true
   h2:
     console:
       enabled: true
-      settings:
-        trace: true
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+decorator:
+  datasource:
+    datasource-proxy:
+      query:
+        log-level: info

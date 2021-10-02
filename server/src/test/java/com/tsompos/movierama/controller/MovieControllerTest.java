@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -63,7 +62,7 @@ class MovieControllerTest {
     @SneakyThrows
     void shouldReturnConflictWhenSameMovieExists() {
         //given
-        Mockito.when(movieRecommendationService.save(any(), any())).thenThrow(new EntityExistsException());
+        Mockito.when(movieRecommendationService.save(any())).thenThrow(new EntityExistsException());
         //when
         mockMvc.perform(post(MOVIES_URL).contentType(MediaType.APPLICATION_JSON)
             .content("{\"title\": \"a Title\", \"description\": \"a " + "Description\"}")
@@ -74,7 +73,7 @@ class MovieControllerTest {
     @SneakyThrows
     void shouldThrowInternalServerErrorWhenGenericExceptionIsThrown() {
         //given
-        Mockito.when(movieRecommendationService.save(any(), any())).thenThrow(new RuntimeException("null"));
+        Mockito.when(movieRecommendationService.save(any())).thenThrow(new RuntimeException("null"));
         //when
         mockMvc.perform(post(MOVIES_URL).contentType(MediaType.APPLICATION_JSON)
             .content("{\"title\": \"a Title\", \"description\": \"a " + "Description\"}")
@@ -85,7 +84,7 @@ class MovieControllerTest {
     @SneakyThrows
     void shouldThrowEntityNotFoundExceptionWhenTheMovieDoesNotExistWhenReactingToAMovie() {
         //given
-        Mockito.doThrow(new EntityNotFoundException()).when(movieRecommendationService).addReaction(any(), any(), any());
+        Mockito.doThrow(new EntityNotFoundException()).when(movieRecommendationService).react(any(), any(), any());
         //when
         mockMvc.perform(
             put(MOVIES_URL + "/{movieId}" + "/like", 123).contentType(MediaType.APPLICATION_JSON).with(jwt().jwt(jwt)))

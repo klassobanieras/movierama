@@ -1,5 +1,4 @@
 HELP.md
-.gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
@@ -66,3 +65,5 @@ out
 
 # Lombok
 **/generated/
+#diffblue
+.diffblue

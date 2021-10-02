@@ -7,12 +7,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
 import static com.tsompos.movierama.config.ApplicationConfiguration.MOVIES_URL;
 
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    public final static String USER_CLAIM = "username";
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -22,7 +23,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .csrf(AbstractHttpConfigurer::disable)
             .cors().and()
             .authorizeRequests(authorize -> authorize
-                .mvcMatchers(HttpMethod.GET, MOVIES_URL, MOVIES_URL + "/*")
+                    .mvcMatchers(HttpMethod.GET, MOVIES_URL, MOVIES_URL + "/*")
                     .permitAll()
                 .anyRequest()
                     .authenticated()

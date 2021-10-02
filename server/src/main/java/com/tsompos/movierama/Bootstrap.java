@@ -18,36 +18,36 @@ public class Bootstrap {
     @EventListener(ApplicationReadyEvent.class)
     public void setup() {
         MovieRecommendation firstMovieRecommendation = MovieRecommendation.builder()
-            .title("A Greek")
-            .description("aDescription")
-            .publishedBy("john")
-            .countOfLikes(5)
-            .countOfHates(1)
-            .build();
+                                                                          .title("A Greek")
+                                                                          .description("aDescription")
+                                                                          .publishedBy("john")
+                                                                          .countOfLikes(5L)
+                                                                          .countOfHates(1L)
+                                                                          .build();
 
         MovieRecommendation secondMovie = MovieRecommendation.builder()
-            .title("Big")
-            .description("aDescription")
-            .publishedBy("john")
-            .countOfLikes(5)
-            .countOfHates(1)
-            .build();
+                                                             .title("Big")
+                                                             .description("aDescription")
+                                                             .publishedBy("john")
+                                                             .countOfLikes(5L)
+                                                             .countOfHates(1L)
+                                                             .build();
 
         MovieRecommendation thirdMovie = MovieRecommendation.builder()
-            .title("Fat")
-            .description("aDescription")
-            .publishedBy("john")
-            .countOfLikes(3)
-            .countOfHates(1)
-            .build();
+                                                            .title("Fat")
+                                                            .description("aDescription")
+                                                            .publishedBy("john")
+                                                            .countOfLikes(3L)
+                                                            .countOfHates(1L)
+                                                            .build();
 
         MovieRecommendation fourthMovie = MovieRecommendation.builder()
-            .title("Family")
-            .description("aDescription")
-            .publishedBy("john")
-            .countOfLikes(9)
-            .countOfHates(1)
-            .build();
+                                                             .title("Family")
+                                                             .description("aDescription")
+                                                             .publishedBy("john")
+                                                             .countOfLikes(9L)
+                                                             .countOfHates(1L)
+                                                             .build();
 
         movieRecommendationRepository.saveAll(List.of(firstMovieRecommendation, secondMovie, thirdMovie, fourthMovie));
     }

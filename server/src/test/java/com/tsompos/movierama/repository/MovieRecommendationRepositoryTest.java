@@ -1,16 +1,19 @@
 package com.tsompos.movierama.repository;
 
-import com.tsompos.movierama.dto.MovieProjection;
-import com.tsompos.movierama.entity.*;
-import org.junit.jupiter.api.Assertions;
+import com.tsompos.movierama.entity.MovieRecommendation;
+import com.tsompos.movierama.entity.Reaction;
+import com.tsompos.movierama.entity.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
-import javax.persistence.EntityManager;
 import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
@@ -18,134 +21,72 @@ class MovieRecommendationRepositoryTest {
 
     @Autowired
     private MovieRecommendationRepository movieRecommendationRepository;
-    @Autowired
-    private EntityManager entityManager;
+    private MovieRecommendation.MovieRecommendationBuilder movieRecommendationBuilder;
+
+    @BeforeEach
+    void setUp() {
+        movieRecommendationBuilder = MovieRecommendation
+                .builder()
+                .title("aTitle")
+                .description("a description")
+                .usersThatLiked(Set.of(User.builder().userName("me").build(), User.builder().userName("you").build()))
+                .countOfLikes(2L)
+                .publishedBy("publisher");
+    }
 
     @Test
-    void findAll() {
-        movieRecommendationRepository.save(MovieRecommendation.builder()
-            .title("aTitle")
-            .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).email("1234").build(),
-                UserReaction.builder().reaction(Reaction.LIKE).email("12345").build()))
-            .countOfLikes(2)
-            .build());
+    void findAllAnonymousUser() {
+        movieRecommendationRepository.save(movieRecommendationBuilder.build());
 
-        Page<MovieProjection> movies = movieRecommendationRepository.findAll("",Pageable.unpaged());
-        assertEquals(movies.getContent().size(), 1);
-        assertEquals(movies.getContent().get(0).getCountOfLikes(), 2);
+        var movies = movieRecommendationRepository.findAll("", Pageable.unpaged());
+        assertThat(movies.getContent().size()).isOne();
+        assertThat(movies.getContent().get(0).getCountOfLikes()).isEqualTo(2);
     }
 
     @Test
     void findAllAndUserReactionOf() {
-        movieRecommendationRepository.save(MovieRecommendation.builder()
-            .title("aTitle")
-            .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).email("1234").build(),
-                UserReaction.builder().reaction(Reaction.LIKE).email("12345").build()))
-            .countOfLikes(2)
-            .build());
+        movieRecommendationRepository.save(movieRecommendationBuilder.build());
 
-        Page<MovieProjection> movies = movieRecommendationRepository.findAll("12345", Pageable.unpaged());
+        var movies = movieRecommendationRepository.findAll("aUserThatHasNotReacted", Pageable.unpaged());
         assertEquals(1, movies.getContent().size());
         assertEquals(2, movies.getContent().get(0).getCountOfLikes());
-        assertEquals("LIKE", movies.getContent().get(0).getCurrentUserReaction());
-
-        movies = movieRecommendationRepository.findAll("aUserThatHasNotReacted", Pageable.unpaged());
-        assertEquals(1, movies.getContent().size());
-        assertEquals(2, movies.getContent().get(0).getCountOfLikes());
-        assertEquals("NONE", movies.getContent().get(0).getCurrentUserReaction());
+        assertEquals(Reaction.NONE, movies.getContent().get(0).getUsersReaction());
     }
 
     @Test
     void findAllSortByLikes() {
-        movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
+        movieRecommendationRepository.save(movieRecommendationBuilder.countOfLikes(2L).build());
+        movieRecommendationRepository.save(movieRecommendationBuilder.title("for sure another title")
+                                                                     .countOfLikes(1L)
+                                                                     .build());
+        movieRecommendationRepository.save(movieRecommendationBuilder.title("another title").countOfLikes(0L).build());
+        PageRequest countOfLikesDesc = PageRequest.of(0, 10, Sort.by("countOfLikes").descending());
+        var movies =
+                movieRecommendationRepository.findAll("", countOfLikesDesc);
 
-        movieRecommendationRepository.save(MovieRecommendation.builder()
-            .title("bTitle")
-            .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).email("1234").build(),
-                UserReaction.builder().reaction(Reaction.LIKE).email("12345").build()))
-            .countOfLikes(2)
-            .build());
-
-        movieRecommendationRepository.save(MovieRecommendation.builder()
-            .title("cTitle")
-            .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.LIKE).email("1234").build()))
-            .countOfLikes(1)
-            .build());
-
-        Page<MovieProjection> movies =
-            movieRecommendationRepository.findAll("", PageRequest.of(0, 10, Sort.by("COUNT_OF_LIKES").descending()));
-
-        assertEquals(3, movies.getContent().size());
-        assertEquals(2, movies.getContent().get(0).getCountOfLikes());
-        assertEquals(1, movies.getContent().get(1).getCountOfLikes());
-        assertEquals(0, movies.getContent().get(2).getCountOfLikes());
+        assertThat(movies.getContent().size()).isEqualTo(3);
+        assertThat(movies.getContent().get(0).getCountOfLikes()).isEqualTo(2);
+        assertThat(movies.getContent().get(1).getCountOfLikes()).isEqualTo(1);
+        assertThat(movies.getContent().get(2).getCountOfLikes()).isEqualTo(0);
     }
 
     @Test
     void findAllSortByHates() {
-        movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
+        movieRecommendationRepository.save(movieRecommendationBuilder.countOfHates(0L).build());
+        movieRecommendationRepository.save(movieRecommendationBuilder.title("for sure another title")
+                                                                     .countOfHates(1L)
+                                                                     .build());
+        movieRecommendationRepository.save(movieRecommendationBuilder.title("another title").countOfHates(2L).build());
 
-        movieRecommendationRepository.save(MovieRecommendation.builder()
-            .title("bTitle")
-            .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.HATE).email("1234").build(),
-                UserReaction.builder().reaction(Reaction.HATE).email("12345").build()))
-            .countOfHates(2)
-            .build());
-
-        movieRecommendationRepository.save(MovieRecommendation.builder()
-            .title("cTitle")
-            .description("a description")
-            .userReactions(Set.of(UserReaction.builder().reaction(Reaction.HATE).email("1234").build()))
-            .countOfHates(1)
-            .build());
-
-        Page<MovieProjection> movies =
-            movieRecommendationRepository.findAll("",PageRequest.of(0, 10, Sort.by("COUNT_OF_HATES").descending()));
+        PageRequest countOfHatesDesc = PageRequest.of(0, 10, Sort.by("countOfHates").descending());
+        var movies =
+                movieRecommendationRepository.findAll("", countOfHatesDesc);
 
         assertEquals(3, movies.getContent().size());
-        assertEquals(2, movies.getContent().get(0).getCountOfHates());
-        assertEquals(1, movies.getContent().get(1).getCountOfHates());
-        assertEquals(0, movies.getContent().get(2).getCountOfHates());
+        assertThat(movies.getContent().size()).isEqualTo(3);
+        assertThat(movies.getContent().get(0).getCountOfHates()).isEqualTo(2);
+        assertThat(movies.getContent().get(1).getCountOfHates()).isEqualTo(1);
+        assertThat(movies.getContent().get(2).getCountOfHates()).isEqualTo(0);
     }
 
-    @Test
-    void testIncrementLikes() {
-        MovieRecommendation movieRecommendation = movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
-        movieRecommendationRepository.incrementLikes(movieRecommendation.getId());
-        entityManager.clear();
-
-        Assertions.assertEquals(1, movieRecommendationRepository.findById(movieRecommendation.getId()).get().getCountOfLikes());
-    }
-
-    @Test
-    void testIncrementHates() {
-        MovieRecommendation movieRecommendation = movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
-        movieRecommendationRepository.incrementHates(movieRecommendation.getId());
-        entityManager.clear();
-
-        Assertions.assertEquals(1, movieRecommendationRepository.findById(movieRecommendation.getId()).get().getCountOfHates());
-    }
-
-    @Test
-    void testDecrementLikes() {
-        MovieRecommendation movieRecommendation = movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
-        movieRecommendationRepository.decrementLikes(movieRecommendation.getId());
-        entityManager.clear();
-
-        Assertions.assertEquals(-1, movieRecommendationRepository.findById(movieRecommendation.getId()).get().getCountOfLikes());
-    }
-
-    @Test
-    void testDecrementHates() {
-        MovieRecommendation movieRecommendation = movieRecommendationRepository.save(MovieRecommendation.builder().title("aTitle").description("a description").build());
-        movieRecommendationRepository.decrementHates(movieRecommendation.getId());
-        entityManager.clear();
-
-        Assertions.assertEquals(-1, movieRecommendationRepository.findById(movieRecommendation.getId()).get().getCountOfHates());
-    }
 }

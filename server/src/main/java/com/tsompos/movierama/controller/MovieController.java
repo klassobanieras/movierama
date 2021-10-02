@@ -1,75 +1,81 @@
 package com.tsompos.movierama.controller;
 
-import com.tsompos.movierama.dto.CreateMovie;
-import com.tsompos.movierama.dto.MovieProjection;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tsompos.movierama.entity.MovieRecommendation;
 import com.tsompos.movierama.entity.Reaction;
+import com.tsompos.movierama.entity.User;
+import com.tsompos.movierama.repository.MovieRecommendationRepository.MovieWithReaction;
 import com.tsompos.movierama.service.MovieRecommendationService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
+import java.util.UUID;
+
 import static com.tsompos.movierama.config.ApplicationConfiguration.MOVIES_URL;
+import static com.tsompos.movierama.config.SecurityConfiguration.USER_CLAIM;
+import static java.util.Optional.ofNullable;
 
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin
-@Slf4j
 public class MovieController {
 
-    private final MovieRecommendationService movieRecommendationService;
+    private final MovieRecommendationService service;
 
     @GetMapping(MOVIES_URL)
-    public Page<MovieProjection> getAllMovies(@AuthenticationPrincipal Jwt principal, @PageableDefault(page = 0, size = 20)
-    @SortDefault.SortDefaults( {@SortDefault(sort = "PUBLISHED_DATE", direction = Sort.Direction.DESC)}) Pageable pageable) {
-        if (principal != null && principal.containsClaim("email")) {
-            return movieRecommendationService.fetchAllMovies(principal.getClaimAsString("email"), pageable);
-        }
-        return movieRecommendationService.fetchAllMovies("", pageable);
+    public Page<MovieWithReaction> getAllMovies(@AuthenticationPrincipal Jwt principal,
+                                                @SortDefault(sort = "publishedDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        String usernameOfCurrentUser = principal != null ? ofNullable(principal.getClaimAsString(USER_CLAIM)).orElse("") : "";
+        return service.fetchAllMovies(usernameOfCurrentUser, pageable);
     }
 
     @GetMapping(MOVIES_URL + "/{email}")
-    public Page<MovieProjection> getAllMovies(@AuthenticationPrincipal Jwt principal, @PathVariable String email, @PageableDefault(page = 0, size = 20)
-    @SortDefault.SortDefaults( {@SortDefault(sort = "PUBLISHED_DATE", direction = Sort.Direction.DESC)}) Pageable pageable) {
-        if (principal != null && principal.containsClaim("email")) {
-            return movieRecommendationService.fetchAllMoviesOfUser(principal.getClaimAsString("email"), email, pageable);
-        }
-        return movieRecommendationService.fetchAllMoviesOfUser("", email, pageable);
+    public Page<MovieWithReaction> getAllMoviesRecommendedBy(@AuthenticationPrincipal Jwt principal,
+                                                             @PathVariable String email,
+                                                             @SortDefault(sort = "publishedDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        String usernameOfCurrentUser = principal != null ? ofNullable(principal.getClaimAsString(USER_CLAIM)).orElse("") : "";
+        return service.fetchAllMoviesOfUser(usernameOfCurrentUser, email, pageable);
     }
 
     @PostMapping(MOVIES_URL)
     @ResponseStatus(HttpStatus.CREATED)
-    public MovieRecommendation createMovieRecommendation(@AuthenticationPrincipal Jwt principal,
-                                                         @RequestBody CreateMovie createMovie) {
-        log.info(principal.getClaims().toString());
-        log.info(principal.getSubject());
-        return movieRecommendationService.save(createMovie, principal.getClaimAsString("email"));
+    public MovieRecommendation createMovieRecommendation(@NotNull @AuthenticationPrincipal Jwt principal,
+                                                         @RequestBody CreateMovieRecommendation command) {
+
+        var movieRecommendation = MovieRecommendation.builder()
+                                                     .title(command.title())
+                                                     .description(command.description())
+                                                     .publishedBy(principal.getClaimAsString(USER_CLAIM))
+                                                     .build();
+        return service.save(movieRecommendation);
     }
 
     @PostMapping(MOVIES_URL + "/{movieId}/reaction/{reaction}")
-    public ResponseEntity<String> setReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId, @PathVariable String reaction) {
-        movieRecommendationService.addReaction(movieId, principal.getClaimAsString("email"),
-            Reaction.valueOf(reaction.toUpperCase()));
-        return ResponseEntity.ok("{\"Success\": \"true\"}");
+    public ReactionResponse setReaction(@AuthenticationPrincipal Jwt principal,
+                                        @PathVariable UUID movieId,
+                                        @PathVariable String reaction) {
+        User user = User.builder().userName(principal.getClaimAsString(USER_CLAIM)).build();
+        service.react(movieId, user, Reaction.fromInput(reaction));
+        return new ReactionResponse(true);
     }
 
-    @DeleteMapping(MOVIES_URL + "/{movieId}/reaction")
-    public ResponseEntity<String> removeReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId) {
-        movieRecommendationService.removeReaction(movieId, principal.getClaimAsString("email"));
-        return ResponseEntity.ok("{\"Success\": \"true\"}");
+    record ReactionResponse(boolean success) {
     }
 
-    @PutMapping(MOVIES_URL + "/{movieId}/reaction")
-    public ResponseEntity<String> switchReaction(@AuthenticationPrincipal Jwt principal, @PathVariable Long movieId) {
-        movieRecommendationService.switchReaction(movieId, principal.getClaimAsString("email"));
-        return ResponseEntity.ok("{\"Success\": \"true\"}");
+    record CreateMovieRecommendation(String title, String description) {
+        @JsonCreator
+        public CreateMovieRecommendation(@JsonProperty("title") String title, @JsonProperty("description") String description) {
+            this.title = title;
+            this.description = description;
+        }
     }
-
 }

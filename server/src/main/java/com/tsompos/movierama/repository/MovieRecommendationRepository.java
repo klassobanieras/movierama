@@ -1,60 +1,70 @@
 package com.tsompos.movierama.repository;
 
-import com.tsompos.movierama.dto.MovieProjection;
 import com.tsompos.movierama.entity.MovieRecommendation;
+import com.tsompos.movierama.entity.Reaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.*;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface MovieRecommendationRepository extends JpaRepository<MovieRecommendation, Long> {
+public interface MovieRecommendationRepository extends JpaRepository<MovieRecommendation, UUID> {
 
-    @Query(value =
-        "SELECT m.* , cur.reaction AS CURRENT_USER_REACTION " +
-            "FROM MOVIE_RECOMMENDATION m " +
-                  "LEFT JOIN ( SELECT ur.MOVIE_RECOMMENDATION_ID, ur.reaction " +
-                                "FROM MOVIE_RECOMMENDATION_USER_REACTIONS ur " +
-                                "WHERE ur.email = :emailOfCurrentUser" +
-                            ") as cur ON cur.MOVIE_RECOMMENDATION_ID = m.ID "
-        , countQuery = "SELECT COUNT(*) FROM MOVIE_RECOMMENDATION"
-        , nativeQuery = true)
-    Page<MovieProjection> findAll(@Param("emailOfCurrentUser") String emailOfCurrentUser, Pageable pageable);
+    @Query("select m.id as id, " +
+            "m.title as title, " +
+            "m.description as description, " +
+            "m.countOfHates as countOfHates, " +
+            "m.countOfLikes as countOfLikes, " +
+            "m.publishedBy as publishedBy, " +
+            "m.publishedDate as publishedDate, " +
+            "case when l.userName is not null then 'LIKE' when h.userName is not null then 'HATE' else 'NONE' end as usersReaction " +
+            "from MovieRecommendation m " +
+            "left join m.usersThatLiked as l on (l.userName = :username) " +
+            "left join m.usersThatHated as h on (h.userName = :username) ")
+    Page<MovieWithReaction> findAll(String username, Pageable pageable);
 
-    @Query(value =
-        "SELECT m.* , cur.reaction AS CURRENT_USER_REACTION " +
-            "FROM MOVIE_RECOMMENDATION m " +
-                "LEFT JOIN ( SELECT ur.MOVIE_RECOMMENDATION_ID, ur.reaction " +
-                                "FROM MOVIE_RECOMMENDATION_USER_REACTIONS ur " +
-                                "WHERE ur.email = :emailOfCurrentUser" +
-                            ") as cur ON cur.MOVIE_RECOMMENDATION_ID = m.ID " +
-            "WHERE m.PUBLISHED_BY = :email"
-        , countQuery = "SELECT COUNT(*) FROM MOVIE_RECOMMENDATION m WHERE m.PUBLISHED_BY = :email"
-        , nativeQuery = true)
-    Page<MovieProjection> findAllPublishedBy(@Param("emailOfCurrentUser") String emailOfCurrentUser, @Param("email") String email, Pageable pageable);
+    @Query("select m.id as id, " +
+            "m.title as title, " +
+            "m.description as description, " +
+            "m.countOfHates as countOfHates, " +
+            "m.countOfLikes as countOfLikes, " +
+            "m.publishedBy as publishedBy, " +
+            "m.publishedDate as publishedDate, " +
+            "case when l.userName is not null then 'LIKE' when h.userName is not null then 'HATE' else 'NONE' end as usersReaction " +
+            "from MovieRecommendation m " +
+            "left join m.usersThatLiked as l on (l.userName = :username) " +
+            "left join m.usersThatHated as h on (h.userName = :username) " +
+            "where m.publishedBy = :publishedBy ")
+    Page<MovieWithReaction> findAllPublishedBy(String username, String publishedBy, Pageable pageable);
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE MovieRecommendation movie SET movie.countOfLikes = movie.countOfLikes + 1 WHERE movie.id = :movieId")
-    void incrementLikes(@Param("movieId") Long movieId);
+    @Query("select distinct m " +
+            "from MovieRecommendation as m " +
+            "left join fetch m.usersThatHated " +
+            "left join fetch m.usersThatLiked where m.id = :id ")
+    Optional<MovieRecommendation> findById(UUID id);
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE MovieRecommendation movie SET movie.countOfHates = movie.countOfHates + 1 WHERE movie.id= :movieId")
-    void incrementHates(@Param("movieId") Long movieId);
+    interface MovieWithReaction {
+        UUID getId();
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE MovieRecommendation movie SET movie.countOfLikes = movie.countOfLikes - 1 WHERE movie.id = :movieId")
-    void decrementLikes(@Param("movieId") Long movieId);
+        String getTitle();
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE MovieRecommendation movie SET movie.countOfHates = movie.countOfHates - 1 WHERE movie.id= :movieId")
-    void decrementHates(@Param("movieId") Long movieId);
+        String getDescription();
 
+        Long getCountOfLikes();
+
+        Long getCountOfHates();
+
+        String getCurrentUserReaction();
+
+        String getPublishedBy();
+
+        LocalDateTime getPublishedDate();
+
+        Reaction getUsersReaction();
+    }
 }
