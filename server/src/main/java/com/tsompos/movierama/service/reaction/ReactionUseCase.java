@@ -4,7 +4,7 @@ import com.tsompos.movierama.entity.MovieRecommendation;
 import com.tsompos.movierama.entity.Reaction;
 import com.tsompos.movierama.entity.User;
 
-public interface ReactionService {
+public interface ReactionUseCase {
 
     Reaction getReaction();
 

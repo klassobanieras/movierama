@@ -5,7 +5,7 @@ import com.tsompos.movierama.entity.Reaction;
 import com.tsompos.movierama.entity.User;
 import com.tsompos.movierama.error.OwnMovieRecommendation;
 import com.tsompos.movierama.repository.MovieRecommendationRepository;
-import com.tsompos.movierama.service.reaction.ReactionService;
+import com.tsompos.movierama.service.reaction.ReactionUseCase;
 import io.vavr.control.Try;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 public class MovieRecommendationService {
 
     private final MovieRecommendationRepository movieRecommendationRepository;
-    private final Map<Reaction, ReactionService> reactionServices;
+    private final Map<Reaction, ReactionUseCase> reactionServices;
 
-    public MovieRecommendationService(MovieRecommendationRepository movieRecommendationRepository, List<ReactionService> reactionServices) {
+    public MovieRecommendationService(MovieRecommendationRepository movieRecommendationRepository, List<ReactionUseCase> reactionServices) {
         this.movieRecommendationRepository = movieRecommendationRepository;
         this.reactionServices = reactionServices.stream()
-                .collect(Collectors.toMap(ReactionService::getReaction, reactionService -> reactionService));
+                                                .collect(Collectors.toMap(ReactionUseCase::getReaction, reactionService -> reactionService));
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +43,6 @@ public class MovieRecommendationService {
     }
 
     public MovieRecommendation save(MovieRecommendation movieRecommendation) {
-
         return Try.of(() -> movieRecommendationRepository.save(movieRecommendation))
                 .getOrElseThrow(() -> new EntityExistsException("The Movie already exists"));
     }

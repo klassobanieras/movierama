@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-class NoneService implements ReactionService {
+class NoneReactionService implements ReactionUseCase {
 
     private final ReactionRepository reactionRepository;
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-class LikeService implements ReactionService {
+class LikeReactionService implements ReactionUseCase {
 
     private final ReactionRepository reactionRepository;
 
