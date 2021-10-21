@@ -15,7 +15,8 @@ public interface ReactionRepository extends Repository<MovieRecommendation, UUID
     @Query("""
             UPDATE MovieRecommendation movie
             SET movie.countOfLikes = movie.countOfLikes + 1
-            WHERE movie.id = :movieId""")
+            WHERE movie.id = :movieId
+            """)
     void incrementLikes(@Param("movieId") UUID movieId);
 
     @Modifying
@@ -23,7 +24,8 @@ public interface ReactionRepository extends Repository<MovieRecommendation, UUID
     @Query("""
             UPDATE MovieRecommendation movie
             SET movie.countOfHates = movie.countOfHates + 1
-            WHERE movie.id= :movieId""")
+            WHERE movie.id= :movieId
+            """)
     void incrementHates(@Param("movieId") UUID movieId);
 
     @Modifying
@@ -31,7 +33,8 @@ public interface ReactionRepository extends Repository<MovieRecommendation, UUID
     @Query("""
             UPDATE MovieRecommendation movie
             SET movie.countOfLikes = movie.countOfLikes - 1
-            WHERE movie.id = :movieId""")
+            WHERE movie.id = :movieId
+            """)
     void decrementLikes(@Param("movieId") UUID movieId);
 
     @Modifying
@@ -39,6 +42,7 @@ public interface ReactionRepository extends Repository<MovieRecommendation, UUID
     @Query("""
             UPDATE MovieRecommendation movie
             SET movie.countOfHates = movie.countOfHates - 1
-            WHERE movie.id= :movieId""")
+            WHERE movie.id= :movieId
+            """)
     void decrementHates(@Param("movieId") UUID movieId);
 }
