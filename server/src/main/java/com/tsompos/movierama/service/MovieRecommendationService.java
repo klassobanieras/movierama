@@ -29,7 +29,7 @@ public class MovieRecommendationService {
     public MovieRecommendationService(MovieRecommendationRepository movieRecommendationRepository, List<ReactionService> reactionServices) {
         this.movieRecommendationRepository = movieRecommendationRepository;
         this.reactionServices = reactionServices.stream()
-                                                .collect(Collectors.toMap(ReactionService::getReaction, reactionService -> reactionService));
+                .collect(Collectors.toMap(ReactionService::getReaction, reactionService -> reactionService));
     }
 
     @Transactional(readOnly = true)
@@ -45,13 +45,13 @@ public class MovieRecommendationService {
     public MovieRecommendation save(MovieRecommendation movieRecommendation) {
 
         return Try.of(() -> movieRecommendationRepository.save(movieRecommendation))
-                  .getOrElseThrow(() -> new EntityExistsException("The Movie already exists"));
+                .getOrElseThrow(() -> new EntityExistsException("The Movie already exists"));
     }
 
     public void react(UUID movieId, User user, Reaction reaction) {
         var movieRecommendation =
                 movieRecommendationRepository.findById(movieId)
-                                             .orElseThrow(() -> new EntityNotFoundException("Movie not found."));
+                        .orElseThrow(() -> new EntityNotFoundException("Movie not found."));
 
         if (movieRecommendation.isPublishedBySameUser(user)) {
             throw new OwnMovieRecommendation("Cannot " + reaction.name().toLowerCase() + " your own movie.");

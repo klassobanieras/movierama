@@ -15,37 +15,43 @@ import java.util.UUID;
 @Repository
 public interface MovieRecommendationRepository extends JpaRepository<MovieRecommendation, UUID> {
 
-    @Query("select m.id as id, " +
-            "m.title as title, " +
-            "m.description as description, " +
-            "m.countOfHates as countOfHates, " +
-            "m.countOfLikes as countOfLikes, " +
-            "m.publishedBy as publishedBy, " +
-            "m.publishedDate as publishedDate, " +
-            "case when l.userName is not null then 'LIKE' when h.userName is not null then 'HATE' else 'NONE' end as usersReaction " +
-            "from MovieRecommendation m " +
-            "left join m.usersThatLiked as l on (l.userName = :username) " +
-            "left join m.usersThatHated as h on (h.userName = :username) ")
+    @Query("""
+            select movie.id as id,
+            movie.title as title,
+            movie.description as description,
+            movie.countOfHates as countOfHates,
+            movie.countOfLikes as countOfLikes,
+            movie.publishedBy as publishedBy,
+            movie.publishedDate as publishedDate,
+            case when l.userName is not null then 'LIKE' when h.userName is not null then 'HATE' else 'NONE' end as usersReaction
+            from MovieRecommendation movie
+            left join movie.usersThatLiked as l on (l.userName = :username)
+            left join movie.usersThatHated as h on (h.userName = :username)
+            """)
     Page<MovieWithReaction> findAll(String username, Pageable pageable);
 
-    @Query("select m.id as id, " +
-            "m.title as title, " +
-            "m.description as description, " +
-            "m.countOfHates as countOfHates, " +
-            "m.countOfLikes as countOfLikes, " +
-            "m.publishedBy as publishedBy, " +
-            "m.publishedDate as publishedDate, " +
-            "case when l.userName is not null then 'LIKE' when h.userName is not null then 'HATE' else 'NONE' end as usersReaction " +
-            "from MovieRecommendation m " +
-            "left join m.usersThatLiked as l on (l.userName = :username) " +
-            "left join m.usersThatHated as h on (h.userName = :username) " +
-            "where m.publishedBy = :publishedBy ")
+    @Query("""
+            select movie.id as id,
+            movie.title as title,
+            movie.description as description,
+            movie.countOfHates as countOfHates,
+            movie.countOfLikes as countOfLikes,
+            movie.publishedBy as publishedBy,
+            movie.publishedDate as publishedDate,
+            case when likeReaction.userName is not null then 'LIKE' when hateReaction.userName is not null then 'HATE' else 'NONE' end as usersReaction
+            from MovieRecommendation movie
+            left join movie.usersThatLiked as likeReaction on (likeReaction.userName = :username)
+            left join movie.usersThatHated as hateReaction on (hateReaction.userName = :username)
+            where movie.publishedBy = :publishedBy
+            """)
     Page<MovieWithReaction> findAllPublishedBy(String username, String publishedBy, Pageable pageable);
 
-    @Query("select distinct m " +
-            "from MovieRecommendation as m " +
-            "left join fetch m.usersThatHated " +
-            "left join fetch m.usersThatLiked where m.id = :id ")
+    @Query("""
+            select distinct m
+            from MovieRecommendation as m
+            left join fetch m.usersThatHated
+            left join fetch m.usersThatLiked where m.id = :id
+            """)
     Optional<MovieRecommendation> findById(UUID id);
 
     interface MovieWithReaction {
