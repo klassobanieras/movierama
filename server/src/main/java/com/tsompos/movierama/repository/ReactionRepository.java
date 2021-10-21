@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * update counts on db in order to let it handle concurrency issues
+ */
 public interface ReactionRepository extends Repository<MovieRecommendation, UUID> {
     @Modifying
     @Transactional

@@ -3,7 +3,6 @@ package com.tsompos.movierama.service;
 import com.tsompos.movierama.entity.MovieRecommendation;
 import com.tsompos.movierama.entity.Reaction;
 import com.tsompos.movierama.entity.User;
-import com.tsompos.movierama.error.OwnMovieRecommendation;
 import com.tsompos.movierama.repository.MovieRecommendationRepository;
 import com.tsompos.movierama.service.reaction.ReactionUseCase;
 import io.vavr.control.Try;
@@ -17,7 +16,8 @@ import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 @Service
 @Transactional
@@ -28,8 +28,9 @@ public class MovieRecommendationService {
 
     public MovieRecommendationService(MovieRecommendationRepository movieRecommendationRepository, List<ReactionUseCase> reactionServices) {
         this.movieRecommendationRepository = movieRecommendationRepository;
+        // map services to reactions to easily select service based on a reaction
         this.reactionServices = reactionServices.stream()
-                                                .collect(Collectors.toMap(ReactionUseCase::getReaction, reactionService -> reactionService));
+                                                .collect(toMap(ReactionUseCase::getReaction, service -> service));
     }
 
     @Transactional(readOnly = true)
@@ -50,11 +51,8 @@ public class MovieRecommendationService {
     public void react(UUID movieId, User user, Reaction reaction) {
         var movieRecommendation =
                 movieRecommendationRepository.findById(movieId)
-                        .orElseThrow(() -> new EntityNotFoundException("Movie not found."));
-
-        if (movieRecommendation.isPublishedBySameUser(user)) {
-            throw new OwnMovieRecommendation("Cannot " + reaction.name().toLowerCase() + " your own movie.");
-        }
+                                             .orElseThrow(() -> new EntityNotFoundException("Movie not found."))
+                                             .validate(user);
 
         reactionServices.get(reaction).react(movieRecommendation, user);
     }

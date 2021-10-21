@@ -1,5 +1,6 @@
 package com.tsompos.movierama.entity;
 
+import com.tsompos.movierama.error.OwnMovieRecommendation;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -70,5 +71,12 @@ public final class MovieRecommendation {
 
     public boolean isPublishedBySameUser(User user) {
         return publishedBy.equals(user.getUserName());
+    }
+
+    public MovieRecommendation validate(User user) throws OwnMovieRecommendation {
+        if (this.isPublishedBySameUser(user)) {
+            throw new OwnMovieRecommendation("Cannot react to your own movie.");
+        }
+        return this;
     }
 }
