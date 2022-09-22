@@ -1,150 +1,147 @@
 package com.tsompos.movierama.service;
 
-import com.tsompos.movierama.entity.MovieRecommendation;
-import com.tsompos.movierama.entity.Reaction;
-import com.tsompos.movierama.entity.User;
+import com.tsompos.movierama.TestContainerDBTest;
 import com.tsompos.movierama.error.MultipleReactionsException;
-import com.tsompos.movierama.repository.MovieRecommendationRepository;
-import com.tsompos.movierama.repository.ReactionRepository;
+import com.tsompos.movierama.model.MovieReaction;
+import com.tsompos.movierama.model.MovieRecommendation;
+import com.tsompos.movierama.model.Reaction;
+import com.tsompos.movierama.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @SpringBootTest
-class MovieRecommendationServiceTest {
-
-    @MockBean
-    private MovieRecommendationRepository movieRecommendationRepository;
-    @MockBean
-    private ReactionRepository reactionRepository;
+class MovieRecommendationServiceTest extends TestContainerDBTest {
     @Autowired
     private MovieRecommendationService serviceUnderTest;
-    private static final UUID MOVIE_ID = UUID.randomUUID();
-    private static final String USERNAME = "best-username";
-    private final User user = User.builder().userName(USERNAME).build();
-    private final MovieRecommendation noReactionMovie =
-            MovieRecommendation.builder()
-                               .id(MOVIE_ID)
-                               .title("aTitle")
-                               .description("aDescription")
-                               .publishedBy("123")
-                               .build();
-    private final MovieRecommendation likedMovie =
-            MovieRecommendation.builder()
-                               .id(MOVIE_ID)
-                               .title("aTitle")
-                               .description("aDescription")
-                               .publishedBy("123")
-                               .countOfLikes(1L)
-                               .usersThatLiked(new HashSet<>(Set.of(user)))
-                               .build();
-    private final MovieRecommendation hatedMovie =
-            MovieRecommendation.builder()
-                               .id(MOVIE_ID)
-                               .title("aTitle")
-                               .description("aDescription")
-                               .publishedBy("123")
-                               .countOfHates(1L)
-                               .usersThatHated(new HashSet<>(Set.of(user)))
-                               .build();
+
+    static final UUID LIKED_MOVIE_ID = UUID.randomUUID();
+    static final UUID HATED_MOVIE_ID = UUID.randomUUID();
+    static final String SIMPLE_USER_NAME = "Joe";
+    static final String REACTED_USER_NAME = "Reacted Joe";
+    static final String PUBLISHER_NAME = "publisher name";
+
+    final User publisher = User.builder().userName(PUBLISHER_NAME).build();
+    final User user = User.builder().userName(SIMPLE_USER_NAME).build();
+    final User reactedUser = User.builder().userName(REACTED_USER_NAME)
+                                 .movieReactions(Set.of(MovieReaction.builder().movieId(LIKED_MOVIE_ID).reaction(Reaction.LIKE)
+                                                                     .build(), MovieReaction.builder().movieId(HATED_MOVIE_ID)
+                                                                                            .reaction(Reaction.HATE).build()))
+                                 .build();
+    final MovieRecommendation likedMovie = MovieRecommendation.builder().id(LIKED_MOVIE_ID).title("A Liked Movie")
+                                                              .description("aDescription").publisherId(publisher.getId()).likes(2L)
+                                                              .build();
+    final MovieRecommendation hatedMovie = MovieRecommendation.builder().id(HATED_MOVIE_ID).title("A Hated Movie")
+                                                              .description("aDescription").publisherId(publisher.getId()).hates(2L)
+                                                              .build();
+
+    private Mono<Void> beforeEach() {
+        var beforeEach = Flux.merge(userRepository.saveAll(Flux.just(publisher, user, reactedUser)), movieRecommendationRepository.saveAll(Flux.just(likedMovie, hatedMovie)));
+        return cleanDB().thenMany(beforeEach).log().then();
+    }
 
     @Test
     void likeAMovie() {
         //given
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(noReactionMovie));
+        var setup = beforeEach().then(serviceUnderTest.react(LIKED_MOVIE_ID, SIMPLE_USER_NAME, Reaction.LIKE));
         //when
-        serviceUnderTest.react(MOVIE_ID, user, Reaction.LIKE);
+        var find = Mono.zip(movieRecommendationRepository.findById(LIKED_MOVIE_ID), userRepository.findByUserName(SIMPLE_USER_NAME));
         //then
-        verify(reactionRepository).incrementLikes(MOVIE_ID);
+        StepVerifier.create(Mono.from(setup).then(find))
+                    .consumeNextWith(zip -> {
+                        //movieRecommendation
+                        assertThat(zip.getT1()).isNotNull()
+                                               .extracting(MovieRecommendation::getLikes)
+                                               .isEqualTo(3L);
+                        //user
+                        assertThat(zip.getT2()).isNotNull().extracting(User::getMovieReactions).extracting(Set::size).isEqualTo(1);
+                    })
+                    .verifyComplete();
     }
 
     @Test
-    void likeALikedMovie() {
+    void hateMovie() {
         //given
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(likedMovie));
+        var setup = beforeEach().then(serviceUnderTest.react(HATED_MOVIE_ID, SIMPLE_USER_NAME, Reaction.HATE));
         //when
-        assertThrows(MultipleReactionsException.class, () -> serviceUnderTest.react(MOVIE_ID, user, Reaction.LIKE));
+        var find = Mono.zip(movieRecommendationRepository.findById(HATED_MOVIE_ID), userRepository.findByUserName(SIMPLE_USER_NAME));
         //then
-        verify(reactionRepository, times(0)).incrementLikes(MOVIE_ID);
-    }
-
-    @Test
-    void likeAHatedMovie() {
-        //given
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(hatedMovie));
-        //when
-        serviceUnderTest.react(MOVIE_ID, user, Reaction.LIKE);
-        //then
-        verify(reactionRepository).decrementHates(MOVIE_ID);
-        verify(reactionRepository).incrementLikes(MOVIE_ID);
-    }
-
-    @Test
-    void hateAMovie() {
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(noReactionMovie));
-        //when
-        serviceUnderTest.react(MOVIE_ID, user, Reaction.HATE);
-        //then
-        verify(reactionRepository).incrementHates(MOVIE_ID);
+        StepVerifier.create(Mono.from(setup).then(find))
+                    .consumeNextWith(zip -> {
+                        //movieRecommendation
+                        assertThat(zip.getT1()).isNotNull()
+                                               .extracting(MovieRecommendation::getHates)
+                                               .isEqualTo(3L);
+                        //user
+                        assertThat(zip.getT2()).isNotNull().extracting(User::getMovieReactions).extracting(Set::size).isEqualTo(1);
+                    })
+                    .verifyComplete();
     }
 
     @Test
     void hateALikedMovie() {
         //given
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(likedMovie));
+        var setup = beforeEach().then(serviceUnderTest.react(LIKED_MOVIE_ID, REACTED_USER_NAME, Reaction.HATE));
         //when
-        serviceUnderTest.react(MOVIE_ID, user, Reaction.HATE);
+        var find = Mono.zip(movieRecommendationRepository.findById(LIKED_MOVIE_ID), userRepository.findByUserName(REACTED_USER_NAME));
         //then
-        verify(reactionRepository).decrementLikes(MOVIE_ID);
-        verify(reactionRepository).incrementHates(MOVIE_ID);
+        StepVerifier.create(Mono.from(setup).then(find))
+                    .consumeNextWith(zip -> {
+                        //movieRecommendation
+                        assertThat(zip.getT1()).isNotNull()
+                                               .extracting(MovieRecommendation::getLikes)
+                                               .isEqualTo(1L);
+                        //user
+                        assertThat(zip.getT2()).isNotNull().extracting(User::getMovieReactions).extracting(Set::size).isEqualTo(1);
+                    })
+                    .verifyComplete();
+    }
+
+    @Test
+    void likeAHatedMovie() {
+        //given
+        var setup = beforeEach().then(serviceUnderTest.react(HATED_MOVIE_ID, REACTED_USER_NAME, Reaction.LIKE));
+        //when
+        var find = Mono.zip(movieRecommendationRepository.findById(HATED_MOVIE_ID), userRepository.findByUserName(REACTED_USER_NAME));
+        //then
+        StepVerifier.create(Mono.from(setup).then(find))
+                    .consumeNextWith(zip -> {
+                        //movieRecommendation
+                        assertThat(zip.getT1()).isNotNull()
+                                               .extracting(MovieRecommendation::getHates)
+                                               .isEqualTo(1L);
+                        //user
+                        assertThat(zip.getT2()).isNotNull().extracting(User::getMovieReactions).extracting(Set::size).isEqualTo(1);
+                    })
+                    .verifyComplete();
+    }
+
+    @Test
+    void likeALikedMovie() {
+        //given
+        var setup = beforeEach().then(serviceUnderTest.react(LIKED_MOVIE_ID, REACTED_USER_NAME, Reaction.LIKE));
+        //when
+        var find = Mono.zip(movieRecommendationRepository.findById(LIKED_MOVIE_ID), userRepository.findByUserName(REACTED_USER_NAME));
+        //then
+        StepVerifier.create(Mono.from(setup).then(find)).expectError(MultipleReactionsException.class).verify();
     }
 
     @Test
     void hateAHatedMovie() {
         //given
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(hatedMovie));
+        var setup = beforeEach().then(serviceUnderTest.react(HATED_MOVIE_ID, REACTED_USER_NAME, Reaction.HATE));
         //when
-        assertThrows(MultipleReactionsException.class, () -> serviceUnderTest.react(MOVIE_ID, user, Reaction.HATE));
+        var find = Mono.zip(movieRecommendationRepository.findById(HATED_MOVIE_ID), userRepository.findByUserName(REACTED_USER_NAME));
         //then
-        verify(reactionRepository, times(0)).incrementHates(MOVIE_ID);
-    }
-
-    @Test
-    void removeReactionFromAMovie() {
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(noReactionMovie));
-        serviceUnderTest.react(MOVIE_ID, user, Reaction.NONE);
-        //then
-        verify(reactionRepository, times(0)).incrementHates(MOVIE_ID);
-        verify(reactionRepository, times(0)).incrementLikes(MOVIE_ID);
-        verify(reactionRepository, times(0)).decrementHates(MOVIE_ID);
-        verify(reactionRepository, times(0)).decrementLikes(MOVIE_ID);
-    }
-
-    @Test
-    void removeReactionFromALikedMovie() {
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(likedMovie));
-        serviceUnderTest.react(MOVIE_ID, user, Reaction.NONE);
-        //then
-        verify(reactionRepository).decrementLikes(MOVIE_ID);
-        verify(reactionRepository, times(0)).incrementHates(MOVIE_ID);
-    }
-
-    @Test
-    void removeReactionFromAHatedMovie() {
-        when(movieRecommendationRepository.findById(any())).thenReturn(Optional.of(hatedMovie));
-        serviceUnderTest.react(MOVIE_ID, user, Reaction.NONE);
-        //then
-        verify(reactionRepository).decrementHates(MOVIE_ID);
-        verify(reactionRepository, times(0)).incrementLikes(MOVIE_ID);
+        StepVerifier.create(Mono.from(setup).then(find)).expectError(MultipleReactionsException.class).verify();
     }
 }

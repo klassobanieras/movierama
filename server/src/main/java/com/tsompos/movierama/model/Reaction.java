@@ -1,4 +1,4 @@
-package com.tsompos.movierama.entity;
+package com.tsompos.movierama.model;
 
 public enum Reaction {
     LIKE, HATE, NONE;

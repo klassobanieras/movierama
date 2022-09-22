@@ -1,7 +1,9 @@
 package com.tsompos.movierama;
 
-import com.tsompos.movierama.entity.MovieRecommendation;
+import com.tsompos.movierama.model.MovieRecommendation;
+import com.tsompos.movierama.model.User;
 import com.tsompos.movierama.repository.MovieRecommendationRepository;
+import com.tsompos.movierama.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -14,41 +16,36 @@ import java.util.List;
 public class Bootstrap {
 
     private final MovieRecommendationRepository movieRecommendationRepository;
+    private final UserRepository userRepository;
 
     @EventListener(ApplicationReadyEvent.class)
     public void setup() {
-        MovieRecommendation firstMovieRecommendation = MovieRecommendation.builder()
-                .title("A Greek")
-                .description("aDescription")
-                .publishedBy("john")
-                .countOfLikes(5L)
-                .countOfHates(1L)
-                .build();
+        User publisher = userRepository.save(User.builder().userName("john").build()).block();
+        var firstMovie = MovieRecommendation.builder()
+                                            .title("A Greek")
+                                            .description("aDescription")
+                                            .publisherId(publisher.getId())
+                                            .likes(2L)
+                                            .build();
 
-        MovieRecommendation secondMovie = MovieRecommendation.builder()
-                .title("Big")
-                .description("aDescription")
-                .publishedBy("john")
-                .countOfLikes(5L)
-                .countOfHates(1L)
-                .build();
+        var secondMovie = MovieRecommendation.builder()
+                                             .title("Big")
+                                             .description("aDescription")
+                                             .publisherId(publisher.getId())
+                                             .build();
 
-        MovieRecommendation thirdMovie = MovieRecommendation.builder()
-                .title("Fat")
-                .description("aDescription")
-                .publishedBy("john")
-                .countOfLikes(3L)
-                .countOfHates(1L)
-                .build();
+        var thirdMovie = MovieRecommendation.builder()
+                                            .title("Fat")
+                                            .description("aDescription")
+                                            .publisherId(publisher.getId())
+                                            .build();
 
-        MovieRecommendation fourthMovie = MovieRecommendation.builder()
-                .title("Family")
-                .description("aDescription")
-                .publishedBy("john")
-                .countOfLikes(9L)
-                .countOfHates(1L)
-                .build();
+        var fourthMovie = MovieRecommendation.builder()
+                                             .title("Family")
+                                             .description("aDescription")
+                                             .publisherId(publisher.getId())
+                                             .build();
 
-        movieRecommendationRepository.saveAll(List.of(firstMovieRecommendation, secondMovie, thirdMovie, fourthMovie));
+        movieRecommendationRepository.saveAll(List.of(firstMovie, secondMovie, thirdMovie, fourthMovie)).blockLast();
     }
 }

@@ -1,17 +1,15 @@
 package com.tsompos.movierama.service.reaction;
 
-import com.tsompos.movierama.entity.MovieRecommendation;
-import com.tsompos.movierama.entity.Reaction;
-import com.tsompos.movierama.entity.User;
-import com.tsompos.movierama.repository.ReactionRepository;
+import com.tsompos.movierama.model.MovieRecommendation;
+import com.tsompos.movierama.model.Reaction;
+import com.tsompos.movierama.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
-class NoneReactionService implements ReactionUseCase {
-
-    private final ReactionRepository reactionRepository;
+public class NoneReactionService implements ReactionUseCase {
 
     @Override
     public Reaction getReaction() {
@@ -19,13 +17,7 @@ class NoneReactionService implements ReactionUseCase {
     }
 
     @Override
-    public void react(MovieRecommendation movieRecommendation, User user) {
-        if (movieRecommendation.userAlreadyHatedTheMovie(user)) {
-            movieRecommendation.getUsersThatHated().remove(user);
-            reactionRepository.decrementHates(movieRecommendation.getId());
-        } else if (movieRecommendation.userAlreadyLikedTheMovie(user)) {
-            movieRecommendation.getUsersThatLiked().remove(user);
-            reactionRepository.decrementLikes(movieRecommendation.getId());
-        }
+    public Mono<Void> react(MovieRecommendation movie, User user) {
+        return Mono.empty();
     }
 }

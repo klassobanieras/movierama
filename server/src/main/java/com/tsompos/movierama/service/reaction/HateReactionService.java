@@ -1,18 +1,19 @@
 package com.tsompos.movierama.service.reaction;
 
-import com.tsompos.movierama.entity.MovieRecommendation;
-import com.tsompos.movierama.entity.Reaction;
-import com.tsompos.movierama.entity.User;
 import com.tsompos.movierama.error.MultipleReactionsException;
-import com.tsompos.movierama.repository.ReactionRepository;
+import com.tsompos.movierama.model.MovieRecommendation;
+import com.tsompos.movierama.model.Reaction;
+import com.tsompos.movierama.model.User;
+import com.tsompos.movierama.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
-class HateReactionService implements ReactionUseCase {
+public class HateReactionService implements ReactionUseCase {
 
-    private final ReactionRepository reactionRepository;
+    private final MovieRepository movieRepository;
 
     @Override
     public Reaction getReaction() {
@@ -20,14 +21,15 @@ class HateReactionService implements ReactionUseCase {
     }
 
     @Override
-    public void react(MovieRecommendation movieRecommendation, User user) {
-        if (movieRecommendation.userAlreadyHatedTheMovie(user)) {
+    public Mono<Void> react(MovieRecommendation movie, User user) {
+        movie.validate(user.getId());
+        if (movie.userAlreadyHatedTheMovie()) {
             throw new MultipleReactionsException("Cannot hate a movie more than once.");
-        } else if (movieRecommendation.userAlreadyLikedTheMovie(user)) {
-            movieRecommendation.getUsersThatLiked().remove(user);
-            reactionRepository.decrementLikes(movieRecommendation.getId());
+        } else if (movie.userAlreadyLikedTheMovie()) {
+            return movieRepository.decAndPullUserThatLikes(movie, user);
         }
-        movieRecommendation.getUsersThatHated().add(user);
-        reactionRepository.incrementHates(movieRecommendation.getId());
+        return movieRepository.incAndPushUserThatHates(movie, user);
     }
+
+
 }

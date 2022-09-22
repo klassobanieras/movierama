@@ -1,12 +1,13 @@
 package com.tsompos.movierama.service.reaction;
 
-import com.tsompos.movierama.entity.MovieRecommendation;
-import com.tsompos.movierama.entity.Reaction;
-import com.tsompos.movierama.entity.User;
+import com.tsompos.movierama.model.MovieRecommendation;
+import com.tsompos.movierama.model.Reaction;
+import com.tsompos.movierama.model.User;
+import reactor.core.publisher.Mono;
 
 public interface ReactionUseCase {
 
     Reaction getReaction();
 
-    void react(MovieRecommendation movieId, User user);
+    Mono<Void> react(MovieRecommendation movie, User user);
 }
