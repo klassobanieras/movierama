@@ -6,9 +6,13 @@ import com.tsompos.movierama.model.MovieReaction;
 import com.tsompos.movierama.model.MovieRecommendation;
 import com.tsompos.movierama.model.Reaction;
 import com.tsompos.movierama.model.User;
+import com.tsompos.movierama.service.reaction.HateReactionService;
+import com.tsompos.movierama.service.reaction.LikeReactionService;
+import com.tsompos.movierama.service.reaction.NoneReactionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.context.annotation.Import;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -19,7 +23,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@SpringBootTest
+@DataMongoTest
+@Import({MovieRecommendationService.class, LikeReactionService.class, HateReactionService.class, NoneReactionService.class})
 class MovieRecommendationServiceTest extends TestContainerDBTest {
     @Autowired
     private MovieRecommendationService serviceUnderTest;
